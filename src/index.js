@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const route = require('./routes/route.js');
+const route = require('./router/route.js');
 const { default: mongoose } = require('mongoose');
 const app = express();
 
@@ -11,11 +11,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.connect("mongodb+srv://hyderali1921:nkkytnwlsFVYce0x@cluster0.apaia.mongodb.net/hyderali1921", {
     useNewUrlParser: true
 })
-.then( () => console.log("MongoDb is connected"))
+.then( () => console.log("MongoDb is connected"))  
 .catch ( err => console.log(err) )
 
-
-app.use('/', route);
+    
+app.use('/', route)
 
 
 app.listen(process.env.PORT || 3000, function () {
