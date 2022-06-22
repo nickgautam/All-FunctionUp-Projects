@@ -10,19 +10,19 @@ const authorModel = require("../Models/authorModel")
 
 const createBlogDoc = async function (req, res) {
     try {
-        let authorId= req.body.authorId
-        let authorDetails= await authorModel.findById(authorId)
-        if(!authorDetails) return res.status(404).send({msg:"No author exist with this Id"})
-
         let blogData = req.body
-          //consol.log(blogData)
-        if (Object.keys(blogData).length != 0) {
+          console.log(blogData)
+        if (Object.keys(blogData).length !== 0) {   
+            let authorId= blogData.authorId
+            let authorDetails= await authorModel.findById(authorId)
+            console.log(authorDetails)
+            if(!authorDetails) return res.status(404).send({msg:"No author exist with this authorId"})
             let savedblogData = await blogModel.create(blogData)
             res.status(201).send({ msg: savedblogData })
         }
-        else res.status(400).send({ msg: "BAD REQUEST" })
-    }
-
+         else {res.status(400).send({ msg: "BAD REQUEST" })}
+  
+}
     catch (err) {
         console.log("This is the error :", err.message)
         res.status(500).send({ msg: "Error", error: err.message })
