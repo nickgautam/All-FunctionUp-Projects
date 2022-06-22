@@ -27,10 +27,10 @@ const createBlogDoc = async function (req, res) {
 /*############################################################## GET API #######################################*/
 
 const blogs = async (req,res)=>{
-    
-    req.query["isDeleted"] = false
-    req.query["isPublished"] = true
-    let blogs = await blogModel.find(req.query)
+    let a =req.query
+    //req.query["isDeleted"] = false
+    //req.query["isPublished"] = true
+    let blogs = await blogModel.find({a}, {isDeleted:false}, {isPublished:true} )
     
            if(Object.keys(blogs).length === 0){
                return res.status(404).send({status:false,msg:"Data not Found"})
@@ -61,7 +61,7 @@ const blogPut = async (req,res)=>{
     blog["tags"] = lodash.uniq(req.body.tags.concat(blogToBeUpdted.tags));
     blog["subCategory"] = lodash.uniq(req.body.subCategory.concat(blogToBeUpdted.subCategory));
     blog["isPublished"] = true
-    blog["publishedAt"] = moment().format("dddd, MMMM Do YYYY, h:mm:ss a");
+    blog["publishedAt"] = moment().format("YYYY MM DDThh:mm:ss SSS[Z]");
     let blogUpdated = await blogModel.findOneAndUpdate({_id:blogId},{blog},{new:true})
 
     if(!blogUpdated){
