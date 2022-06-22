@@ -34,9 +34,9 @@ const createBlogDoc = async function (req, res) {
 const blogs = async (req, res) => {
 
     try {
-    req.query["isDeleted"] = false
-    req.query["isPublished"] = true
-    let blogs = await blogModel.find(req.query)
+    // req.query["isDeleted"] = false
+    // req.query["isPublished"] = true
+    let blogs = await blogModel.find({$and:[{isDeleted: false},{isPublished: true}]}, req.query)
 
     if (Object.keys(blogs).length === 0) {
         return res.status(404).send({ status: false, msg: "Data not Found" })
