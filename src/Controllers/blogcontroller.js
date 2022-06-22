@@ -1,4 +1,11 @@
-const blogModel=require("../Models/blogModel")
+const blogModel = require("../Models/blogModel")
+const moment = require('moment')
+const lodash = require('lodash')
+const { trusted } = require("mongoose")
+
+
+
+/*####################################################### POST API ####################################################*/
 
 const createBlogDoc = async function (req, res) {
     try {
@@ -17,40 +24,15 @@ const createBlogDoc = async function (req, res) {
     }
 }
 
+/*############################################################## GET API #######################################*/
+
 const blogs = async (req,res)=>{
     
-    let authorId = req.query.authorId || false;
-    let category = req.query.category || false;
-    let subCategory = req.query.subCategory||false;
-    let tag = req.query.tag || false;
-    let blogs = await blogModel.find({isDeleted:false,isPublished:true})
-
+    req.query["isDeleted"] = false
+    req.query["isPublished"] = true
+    let blogs = await blogModel.find(req.query)
     
-    // checking by auther_id;
-     if(authorId)
-        blogs = blogs.filter((blog)=>{ 
-           return  blog.authorId.toString() === authorId;
-        })
-//  checking by category
-    if(category)
-    blogs = blogs.filter((blog)=>{ 
-           return blog.category === category
-        })
-//  checking by  subcategory
-
-    if(subCategory)               
-    blogs = blogs.filter((blog)=>{ 
-         return  (blog.subCategory.find(a=>{
-            return a===subCategory})||-1) +1
-        })
-//  Checking by tag
-    if(tag)                           
-    blogs = blogs.filter((blog)=>{ 
-            return  (blog.tags.find((t)=>{
-                return t===tag;
-            })||-1) + 1 })
-    
-           if(!blogs){
+           if(Object.keys(blogs).length === 0){
                return res.status(404).send({status:false,msg:"Data not Found"})
             }
             
@@ -59,6 +41,71 @@ const blogs = async (req,res)=>{
     }
 
 
-    module.exports.blogs=blogs
 
+
+
+
+
+/*##################################################### PUT API ##################################################*/
+
+
+const blogPut = async (req,res)=>{
+
+
+    try {
+        let blog = req.body;
+    if(!blog) return res.status(400).send({status:false,msg:"Bad Request"});
+    let blogId = req.params.blogId;
+    let blogToBeUpdted = await blogModel.findByOne({_id:blogId,isDeleted:false})
+    if(!blogToBeUpdted) return res.status(404).send({status:false,msg:"Use Not Exist"});
+    blog["tags"] = lodash.uniq(req.body.tags.concat(blogToBeUpdted.tags));
+    blog["subCategory"] = lodash.uniq(req.body.subCategory.concat(blogToBeUpdted.subCategory));
+    blog["isPublished"] = true
+    blog["publishedAt"] = moment().format("dddd, MMMM Do YYYY, h:mm:ss a");
+    let blogUpdated = await blogModel.findOneAndUpdate({_id:blogId},{blog},{new:true})
+
+    if(!blogUpdated){
+        return res.status(404).send({status:false,msg:"Use Not Exist"})
+     }
+     
+     return res.status(201).send({status:true,data:blogUpdated})
+    } catch (error) {
+        res.status(500).send({status:false,msg:error.message})
+    }
+
+}
+
+
+
+/*############################################# DELETE APIS ################################################*/
+
+
+const blogDeletById = async (req,res)=>{
+    let blogId = req.params.blogId;
+    if(!blogId) return res.status(400).send({status:false,msg:"Bad Request"});
+    let blogToBeDeleted = await blogModel.findOne({_id:blogId,isDeleted:false})
+    if(!blogToBeDeleted) return res.status(404).send({status:false,msg:"Blog DoesNot Exist"});
+    await blogModel.findOneAndUpdate({_id:blogId},{isDeleted:true})
+    res.status(200).send()
+}
+
+
+const blogDeletByParams = async (req,res)=>{
+    if(!req.query) return res.status(400).send({status:false,msg:"Bad Request"});
+    let blogToBeDeleted = await blogModel.findOne(req.query)
+    if(!blogToBeDeleted) return res.status(404).send({status:false,msg:"Blog DoesNot Exist"});
+    let x = req.query
+    await blogModel.findOneAndUpdate({x},{isDeleted:true})
+    res.status(200).send()
+}
+
+
+
+
+
+
+    module.exports.blogs=blogs
     module.exports.createBlogDoc=createBlogDoc
+    module.exports.blogPut = blogPut
+    module.exports.blogDeletById = blogDeletById
+    module.exports.blogDeletByParams = blogDeletByParams
