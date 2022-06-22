@@ -34,16 +34,17 @@ const createBlogDoc = async function (req, res) {
 const blogs = async (req, res) => {
 
     try {
-    // req.query["isDeleted"] = false
-    // req.query["isPublished"] = true
-    let blogs = await blogModel.find({$and:[{isDeleted: false},{isPublished: true}]}, req.query)
-
-    if (Object.keys(blogs).length === 0) {
-        return res.status(404).send({ status: false, msg: "Data not Found" })
-    }
-
+    req.query["isDeleted"] = false
+    req.query["isPublished"] = true 
+    if(req.query.tags)
+    req.query.tags = {"$all":req.query.tags.split(",")}
+    if(req.query.subCategory)
+    req.query.subCategory = {"$all":req.query.subCategory.split(",")}
+    let blogs = await blogModel.find(req.query)
+    if (Object.keys(blogs).length === 0) return res.status(404).send({ status: false, msg: "Data not Found" })
     return res.status(200).send({ status: true, data: blogs })
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).send({ status: false, msg: error.message })
     }
 
@@ -66,7 +67,7 @@ const blogPut = async (req, res) => {
         if (Object.keys(blog).length===0) return res.status(400).send({ status: false, msg: "Bad Request" });
         let blogId = req.params.blogId;
         let blogToBeUpdted = await blogModel.findOne({ _id: blogId, isDeleted: false })
-        if (Object.keys(blogToBeUpdted).length===0) return res.status(404).send({ status: false, msg: "Blog DoesNot Exist" });
+        if (Object.keys(blogToBeUpdted).length===0) return res.status(404).send({ status: false, msg: "Blog does not exist" });
         blog["tags"] = lodash.uniq(req.body.tags.concat(blogToBeUpdted.tags));
         blog["subCategory"] = lodash.uniq(req.body.subCategory.concat(blogToBeUpdted.subCategory));
         blog["isPublished"] = true
@@ -74,8 +75,8 @@ const blogPut = async (req, res) => {
 
         let blogUpdated = await blogModel.findOneAndUpdate({ _id: blogId }, blog, { new: true, upsert: true, strict: false })
 
-        if (!blogUpdated) {
-            return res.status(404).send({ status: false, msg: "Use Not Exist" })
+        if (Object.keys(blogUpdated).length===0) {
+            return res.status(404).send({ status: false, msg: "Blog does not exist" })
         }
 
         return res.status(201).send({ status: true, data: blogUpdated })
