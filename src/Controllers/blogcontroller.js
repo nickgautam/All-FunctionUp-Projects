@@ -109,7 +109,7 @@ const blogDeletByParams = async (req, res) => {
     try {
         if (!req.query) return res.status(400).send({ status: false, msg: "Bad Request" });
     let blogToBeDeleted = await blogModel.find(req.query)
-    if (Object.keys(blogToBeDeleted).length===0) return res.status(404).send({ status: false, msg: "Blog DoesNot Exist" });
+    if (Object.keys(blogToBeDeleted).length===0) return res.status(404).send({ status: false, msg: "Blog Does Not Exist" });
     for(let i=0;i<blogToBeDeleted.length;i++){
     let temp = JSON.parse(JSON.stringify(blogToBeDeleted[i]));
     temp["deletedAt"] = moment().format("YYYY MM DDThh:mm:ss.SSS[Z]");
