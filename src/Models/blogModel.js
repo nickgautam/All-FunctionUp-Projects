@@ -29,9 +29,11 @@ const blogSchema = new mongoose.Schema(
     type: Boolean,
     default: false
   },
-  deletedAt: "",
- publishedAt: ""
-
+  deletedAt:{
+    type:Date,
+    default: "" 
+  }
+ 
 },{ timestamps: true }
 );
 
