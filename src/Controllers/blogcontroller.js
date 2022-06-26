@@ -134,49 +134,7 @@ module.exports.blogDeleteByQuery = blogDeleteByQuery;
 
 
 
-// /*####################################################### POST API ####################################################*/
 
-// const createBlogDoc = async function (req, res) {
-//     try {
-//         let blogData = req.body
-//           console.log(blogData)
-//         if (Object.keys(blogData).length !== 0) {   
-//             let authorId= blogData.authorId
-//             let authorDetails= await authorModel.findById(authorId)
-//             console.log(authorDetails)
-//             if(!authorDetails) return res.status(404).send({msg:"No author exist with this authorId"})
-//             let savedblogData = await blogModel.create(blogData)
-//             res.status(201).send({ msg: savedblogData })
-//         }
-//          else {res.status(400).send({ msg: "BAD REQUEST" })}
-  
-// }
-//     catch (err) {
-//         console.log("This is the error :", err.message)
-//         res.status(500).send({ msg: "Error", error: err.message })
-//     }
-// }
-
-// /*############################################################## GET API #######################################*/
-
-// const blogs = async (req, res) => {
-
-//     try {
-//     req.query["isDeleted"] = false
-//     req.query["isPublished"] = true 
-//     if(req.query.tags)
-//     req.query.tags = {"$all":req.query.tags.split(",")}
-//     if(req.query.subCategory)
-//     req.query.subCategory = {"$all":req.query.subCategory.split(",")}
-//     let blogs = await blogModel.find(req.query)
-//     if (Object.keys(blogs).length === 0) return res.status(404).send({ status: false, msg: "Data not Found" })
-//     return res.status(200).send({ status: true, data: blogs })
-//     }
-//     catch (error) {
-//         res.status(500).send({ status: false, msg: error.message })
-//     }
-
-// }
 
 
 

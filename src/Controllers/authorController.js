@@ -1,6 +1,7 @@
 const authorModel= require("../Models/authorModel");
 const jwt= require("jsonwebtoken")
 
+//>--------------------------------------------post Api-------------------------------------------->
 
 const createAuthor= async function(req, res){
  try{
@@ -14,6 +15,8 @@ const createAuthor= async function(req, res){
 };
 
 module.exports.createAuthor= createAuthor;
+
+//>------------------------------------------post Api-------------------------------------------------->
 
 const authorLogin= async function(req, res) {
 try {
