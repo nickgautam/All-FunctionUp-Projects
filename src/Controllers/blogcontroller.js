@@ -53,8 +53,10 @@ const updateBlog = async (req, res) => {
       let blogToBeUpdted = await blogModel.findOne({ _id: blogId, isDeleted: false });
       console.log(blogToBeUpdted);
       if (!blogToBeUpdted) return res.status(404).send({ status: false, msg: "Blog does not exist" });
-      blog["tags"] = lodash.uniq(blogToBeUpdted.tags.concat(req.body.tags||[]));
-      blog["subCategory"] = lodash.uniq(blogToBeUpdted.subCategory.concat(req.body.subCategory||[]));
+      if(req.query.tags)
+      blog["tags"] = lodash.uniq(blogToBeUpdted.tags.concat(req.body.tags));
+      if(req.query.subCategory)
+      blog["subCategory"] = lodash.uniq(blogToBeUpdted.subCategory.concat(req.body.subCategory));
       blog["isPublished"] = true
       blog["publishedAt"] = moment().format("YYYY-MM-DDThh:mm:ss.SSS[Z]");
 

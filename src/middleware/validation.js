@@ -1,7 +1,3 @@
-const tags = []
-const category = []
-const subCategory = []
-
 const validateTags = (tags) => {
     if (!Array.isArray(tags)) {
         return tags.replace("[", "").replace("]", "").replace("{", "").replace("}", "").split(",").filter((tag) => {
@@ -35,20 +31,20 @@ const validateCategory = (category) => {
 //                        (?=.*[A-Z]) atleast one uppercase letter
 //                        (?=.*[a-z]) atleast one lowercase letter
 //                        (?=.*[!@#$%^&*]) atleast one special charactor
-//                         [a-zA-Z0-9!@#$%^&*]{6-16} length in b/w in 6 to 16 and any char belongs to [a-zA-Z0-9!@#$%^&*]
+//                         [a-zA-Z0-9!@#$%^&*]{6,16} length in b/w in 6 to 16 and any char belongs to [a-zA-Z0-9!@#$%^&*]
 const validatePassword = (password, res) => {
     let regex = /^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/
     if (!regex.test(password)) {
-        res.status(400).send({ status: false, msg: "Password must contain atleast one uppercase, one lowercase, one special character, and length of password must be in range [6-16]" })
+        res.status(400).send({ status: false, msg: "Password must contain atleast one uppercase, one lowercase, one special character, there should not be any space and length of password must be in range [6-16]" })
         return false;
     }
     return true;
-}
+}                                                         
 
 const validateName = (Name, res, whatis) => {
-    let regex = /[A-Z]{1}[a-z]{2}[a-z]*/
+    let regex = /^[A-Z]{1}[a-z]{2}[a-z]*$/
     if (!regex.test(Name)) {
-        res.status(400).send({ status: false, msg: `${whatis} must start with upper case letter and length must be greater than 2` })
+        res.status(400).send({ status: false, msg: `${whatis} must start with upper case letter  there should not be any space between name, between name and quotes & also length must be greater than 2` })
         return false;
     }
     return true;
@@ -64,12 +60,12 @@ const validateObjectId = (id, res, whatIs) => {
     }
     return true;
 }
-// 633747346746734376473
+
 
 const validateEmail = (email, res) => {
-    var regex = /\S+@\S+\.\S+/;
+    var regex = /\S+@\S+\.\S/;
     if (!regex.test(email)) {
-        res.status(400).send({ status: false, msg: "Email should look like this anything@anything.anything" })
+        res.status(400).send({ status: false, msg: "Email should look like this anything@anything.anything , not include any space" })
         return false;
     }
     return true
@@ -107,12 +103,7 @@ const validateRequest = (req, res, next) => {
             if (!validateEmail(req.body.email, res)) return;
         if (req.body.password !== undefined)
             if (!validatePassword(req.body.password, res)) return;
-
     }
-    
-    if(req.params.blogId!==undefined)
-    if (!validateObjectId(req.params.blogId, res, "blogId")) return;
-
     next()
 
 }

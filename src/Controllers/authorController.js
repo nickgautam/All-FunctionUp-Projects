@@ -6,7 +6,10 @@ const jwt= require("jsonwebtoken")
 const createAuthor= async function(req, res){
  try{
   let data = req.body;
+  let Email= req.body.email;
   if(Object.keys(data).length!==0){
+   let alreadyAuthorExist= await authorModel.find({"email": Email});
+      if(alreadyAuthorExist.length!==0) return res.status(400).send({status:false, msg:"email is already exist in database. Always use unique email to create author data"})
     let savedData= await authorModel.create(data);
     res.status(201).send({status: true , data: savedData});
   }
@@ -34,10 +37,10 @@ try {
     {
       authorId: authorDetails._id.toString(),
     }, "blogProject");
-  req.setHeader("x-api-key", token);
+  res.setHeader("x-api-key", token);
   res.status(201).send({ status: true, token: token })
 
-}catch(err){res.status(500).send({ msg: "Error", error: err.message })}
+}catch(err){res.status(500).send({ status:false, msg: err.message })}
 
 }
 
