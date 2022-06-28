@@ -1,6 +1,6 @@
 const validateTags = (tags) => {
     if (!Array.isArray(tags)) {
-        return tags.replace("[", "").replace("]", "").replace("{", "").replace("}", "").split(",").filter((tag) => {
+        return tags.replace("[", "").replace("]", "").replace("{", "").replace("}", "").trim().split(",").filter((tag) => {
             return tag !== ""
         })
     }
@@ -11,7 +11,7 @@ const validateTags = (tags) => {
 
 const validateSubCategory = (subCategory) => {
     if (!Array.isArray(subCategory)) {
-        return subCategory.replace("[", "").replace("]", "").replace("{", "").replace("}", "").split(",").filter((subCategory) => {
+        return subCategory.replace("[", "").replace("]", "").replace("{", "").replace("}", "").trim().split(",").filter((subCategory) => {
             return subCategory !== ""
         })
     }
@@ -20,7 +20,7 @@ const validateSubCategory = (subCategory) => {
 
 const validateCategory = (category) => {
     if (!Array.isArray(category)) {
-        return category.replace("[", "").replace("]", "").replace("{", "").replace("}", "").split(",").filter((category) => {
+        return category.replace("[", "").replace("]", "").replace("{", "").replace("}", "").trim().split(",").filter((category) => {
             return category !== ""
         })
     }
@@ -33,9 +33,9 @@ const validateCategory = (category) => {
 //                        (?=.*[!@#$%^&*]) atleast one special charactor
 //                         [a-zA-Z0-9!@#$%^&*]{6,16} length in b/w in 6 to 16 and any char belongs to [a-zA-Z0-9!@#$%^&*]
 const validatePassword = (password, res) => {
-    let regex = /^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/
+    let regex = /^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{4,16}$/
     if (!regex.test(password)) {
-        res.status(400).send({ status: false, msg: "Password must contain atleast one uppercase, one lowercase, one special character, there should not be any space and length of password must be in range [6-16]" })
+        res.status(400).send({ status: false, msg: "Password is mandatory & must contain atleast one uppercase, one lowercase, one special character, there should not be any space and length of password must be in range [4-16]" })
         return false;
     }
     return true;
@@ -44,33 +44,36 @@ const validatePassword = (password, res) => {
 const validateName = (Name, res, whatis) => {
     let regex = /^[A-Z]{1}[a-z]{2}[a-z]*$/
     if (!regex.test(Name)) {
-        res.status(400).send({ status: false, msg: `${whatis} must start with upper case letter  there should not be any space between name, between name and quotes & also length must be greater than 2` })
+        res.status(400).send({ status: false, msg: `${whatis} is mandatory & must start with upper case letter, there should not be any space between name, between name and quotes & also length must be greater than 2` })
         return false;
     }
     return true;
 
 }
+
+
 
 const validateObjectId = (id, res, whatIs) => {
     // console.log(id)
     var regex = /^[0-9a-f]{24}$/;
     if (!regex.test(id)) {
-        res.status(400).send({ status: false, msg: `${whatIs} is not valid` });
+        res.status(400).send({ status: false, msg: `${whatIs} is not valid, there should not be any space` });
         return false;
     }
-    return true;
-}
+    return true;           
+}      
 
+// nishant123@gmail.com
 
 const validateEmail = (email, res) => {
-    var regex = /\S+@\S+\.\S/;
+    var regex =  /^[a-z]{2,}[0-9]{2,}@+[a-z]{5,}\.[a-z]{2,4}$/
     if (!regex.test(email)) {
-        res.status(400).send({ status: false, msg: "Email should look like this anything@anything.anything , not include any space" })
+        res.status(400).send({ status: false, msg: "Email is mandatory & should look like this lowercasetext12@gmail.com, contains first atleast two alphabets ,then minimum two digits & not include any space" })
         return false;
-    }
-    return true
+    }   
+    return true   
 
-}
+} 
 
 const validateRequest = (req, res, next) => {
 

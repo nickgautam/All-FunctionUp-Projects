@@ -27,9 +27,9 @@ const getBlog = async function(req, res){
   try{ 
     let filterQuery= {isPublished: true,isDeleted: false}
     if(req.query.tags)
-    {filterQuery["tags"]={"$in":req.query.tags}};
+    {filterQuery["tags"]={"$all":req.query.tags}};
     if(req.query.subCategory)
-    {filterQuery["subCategory"]={"$in":req.query.subCategory}};
+    {filterQuery["subCategory"]={"$all":req.query.subCategory}};
     if(req.query.category)
     {filterQuery["category"]=req.query.category};
     if(req.query.authorId)
@@ -54,9 +54,9 @@ const updateBlog = async (req, res) => {
       console.log(blogToBeUpdted);
       if (!blogToBeUpdted) return res.status(404).send({ status: false, msg: "Blog does not exist" });
       if(req.query.tags)
-      blog["tags"] = lodash.uniq(blogToBeUpdted.tags.concat(req.body.tags));
+      blog["tags"] = lodash.uniq(blogToBeUpdted.tags.concat(req.body.tags||[]));
       if(req.query.subCategory)
-      blog["subCategory"] = lodash.uniq(blogToBeUpdted.subCategory.concat(req.body.subCategory));
+      blog["subCategory"] = lodash.uniq(blogToBeUpdted.subCategory.concat(req.body.subCategory||[]));
       blog["isPublished"] = true
       blog["publishedAt"] = moment().format("YYYY-MM-DDThh:mm:ss.SSS[Z]");
 
