@@ -1,0 +1,27 @@
+{
+  "name": "project-open-to-intern",
+  "version": "1.0.0",
+  "description": "a project about internship",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NeeshamKalia/project-open-to-intern.git"
+  },
+  "author": "45",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NeeshamKalia/project-open-to-intern/issues"
+  },
+  "homepage": "https://github.com/NeeshamKalia/project-open-to-intern#readme",
+  "dependencies": {
+    "body-parser": "^1.20.0",
+    "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.4.1",
+    "nodemon": "^2.0.18"
+  }
+}
