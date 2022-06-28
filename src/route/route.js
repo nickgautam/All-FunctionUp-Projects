@@ -9,8 +9,9 @@ const middleware= require("../middleware/auth")
 
 
 
-//router.post("/functionup/colleges",  )
-router.post("/functionup/interns", )
+router.post("/functionup/colleges", collegeController.createCollege )
+router.post("/functionup/interns", internController.createIntern )
+router.get("/functionup/collegeDetails",collegeController.collegeDetails)
 
 
 
