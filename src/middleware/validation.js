@@ -7,7 +7,7 @@ const validateTags = (tags) => {
     return tags
 
 }
-//  "asgh,gdh,dghd,h" aftersplit ["asgh","gdh","dghd","h"]
+//  "asgh,gdh,dghd,h," aftersplit ["asgh","gdh","dghd","h", ""]
 
 const validateSubCategory = (subCategory) => {
     if (!Array.isArray(subCategory)) {
@@ -31,7 +31,7 @@ const validateCategory = (category) => {
 //                        (?=.*[A-Z]) atleast one uppercase letter
 //                        (?=.*[a-z]) atleast one lowercase letter
 //                        (?=.*[!@#$%^&*]) atleast one special charactor
-//                         [a-zA-Z0-9!@#$%^&*]{6,16} length in b/w in 6 to 16 and any char belongs to [a-zA-Z0-9!@#$%^&*]
+//                         [a-zA-Z0-9!@#$%^&*]{4,16} length in b/w in 6 to 16 and any char belongs to [a-zA-Z0-9!@#$%^&*]
 const validatePassword = (password, res) => {
     let regex = /^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{4,16}$/
     if (!regex.test(password)) {

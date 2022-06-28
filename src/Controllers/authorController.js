@@ -38,7 +38,7 @@ try {
   if(req.body.password){
     loginCredentials["password"]= req.body.password;
   }
-  if(Object.keys(loginCredentials).length===0) return res.status(400).send({status: false, msg: "Bad request! Body should only contain valid email and password."});
+  if(Object.keys(loginCredentials).length===0) return res.status(400).send({status: false, msg: "Bad request! Body should only contain valid email and password and can't be empty."});
   let authorDetails= await authorModel.findOne(loginCredentials);
   if(!authorDetails) return res.status(400).send({status:false, msg:" Combination of email and password are not valid"});
   let token = jwt.sign(

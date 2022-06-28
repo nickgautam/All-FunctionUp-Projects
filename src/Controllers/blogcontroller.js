@@ -18,7 +18,7 @@ const createBlog= async function(req , res){
     } catch(err){res.status(500).send({status: false, msg: err.message})}
 };
  
-module.exports.createBlog= createBlog;
+module.exports.createBlog= createBlog;       
 
 //>----------------------------------------------- Get Api----------------------------------------------------->
 
@@ -29,7 +29,7 @@ const getBlog = async function(req, res){
     if(req.query.tags)
     {filterQuery["tags"]={"$all":req.query.tags}};
     if(req.query.subCategory)
-    {filterQuery["subCategory"]={"$all":req.query.subCategory}};
+    {filterQuery["subCategory"]={"$in":req.query.subCategory}};
     if(req.query.category)
     {filterQuery["category"]=req.query.category};
     if(req.query.authorId)
@@ -53,9 +53,9 @@ const updateBlog = async (req, res) => {
       let blogToBeUpdted = await blogModel.findOne({ _id: blogId, isDeleted: false });
       console.log(blogToBeUpdted);
       if (!blogToBeUpdted) return res.status(404).send({ status: false, msg: "Blog does not exist" });
-      if(req.query.tags)
+      if(req.body.tags)
       blog["tags"] = lodash.uniq(blogToBeUpdted.tags.concat(req.body.tags||[]));
-      if(req.query.subCategory)
+      if(req.body.subCategory)
       blog["subCategory"] = lodash.uniq(blogToBeUpdted.subCategory.concat(req.body.subCategory||[]));
       blog["isPublished"] = true
       blog["publishedAt"] = moment().format("YYYY-MM-DDThh:mm:ss.SSS[Z]");
@@ -85,7 +85,7 @@ const blogDeleteById = async (req, res) => {
   await blogModel.findOneAndUpdate({ _id: blogId }, {$set: {isDeleted: true, deletedAt: moment().format("YYYY-MM-DDThh:mm:ss.SSS[Z]")} }, {new:true})
   res.status(200).send()
   } catch (error) {
-      res.status(500).send({ status: false, msg: error.message })
+      res.status(500).send({ status: false, msg: error.message })   
   }
 }
 
