@@ -30,9 +30,12 @@ const createIntern = async function (req, res) {
 
 
     if (!internData.email){ return res.status(400).send({ status: false, message : "Please include an email" })};
+
   if(typeof(internData.email) != "string"){return res.status(400).send({ status: false, message: "Email is not string" });}
+
   if ((internData.email).trim().length === 0) {return res.status(400).send({ status: false, message: "email can't be empty" });} 
   if ((internData.email).includes(" ")){{return res.status(400).send({ status: false, message: "Please remove any empty spaces in email" });}}
+
    let emailOld = await internModel.findOne({email: internData.email})
    if (emailOld != null){{return res.status(400).send({ status: false, message: "email already exists" })}}
 
@@ -43,18 +46,25 @@ const createIntern = async function (req, res) {
     //if ( phonenumber(internData.mobile) != "true"){ return res.status(400).send({ status: false, message: "mobile must be  number" });}
     if ((internData.mobile).trim().length === 0){{return res.status(400).send({ status: false, message: "mobile can't be empty" });}}
     
-    if ((internData.mobile).includes(" ")){{return res.status(400).send({ status: false, message: "Please remove any empty spaces in mobile" });}}
+    if ((internData.mobile).includes(" ")){{return res.status(400).send({ status: false, message: "Please remove any empty spaces in mobile" });}}    
+  
     if(isNaN(internData.mobile)||(internData.mobile).indexOf(" ")!=-1) {
       return res.status(400).send({ status: false, message: "mobile must be a number"}) }
+
     if ((internData.mobile).length != 10) return res.status(400).send({ status: false, message: "mobile must be a 10 digits"})
-    if ((internData.mobile).charAt(0)!= 9 )return res.status(400).send({ status: false, message: "mobile must start with 9"})
+
+    if ((internData.mobile).charAt(0)= 0 )return res.status(400).send({ status: false, message: "mobile should not start with 0"}) 
+
     let mobileOld = await internModel.findOne({mobile: internData.mobile})
    if (mobileOld != null){{return res.status(400).send({ status: false, message: "mobile already exists" })}}
 
    // collegeId ?? collegeName
    if (!internData.collegeId) {return res.status(400).send({ status: false, message: "Please include the collegeId " })}
+
    if ((internData.collegeId).trim().length === 0){return res.status(400).send({ status: false, message: "collegeId can't be empty" })}
+
    if ((internData.collegeId).includes(" ")){{return res.status(400).send({ status: false, message: "Please remove any empty spaces in collegeId" });}}
+
    if (!mongoose.isValidObjectId((internData.collegeId))) return res.status(400).send({ message: "Invalid college Id" })
    
    let collegeData = await collegeModel.findById((internData.collegeId));
