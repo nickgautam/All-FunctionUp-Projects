@@ -36,8 +36,8 @@ const createIntern = async function (req, res) {
   if ((internData.email).trim().length === 0) {return res.status(400).send({ status: false, message: "email can't be empty" });} 
   if ((internData.email).includes(" ")){{return res.status(400).send({ status: false, message: "Please remove any empty spaces in email" });}}
 
-  let regex = new RegExp("/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/");
-    if(!regex.test((internData.email))){return res.status(400).send({ status: false, message: "Please use right email"})}
+  let regex = /^[a-z]{2,}[0-9]{2,}@+[a-z]{4,}\.[a-z]{2,4}$/          //[a-z0-9]+@[a-z]+\.[a-z]{2,3}
+    if(!regex.test((internData.email))){return res.status(400).send({ status: false, message: "email should look like this lowercasetext12@gmail.com, contains first atleast two alphabets ,then minimum two digits & not include any space "})}
 
 
    let emailOld = await internModel.findOne({email: internData.email})
@@ -57,34 +57,42 @@ const createIntern = async function (req, res) {
 
     if ((internData.mobile).length != 10) return res.status(400).send({ status: false, message: "mobile must be a 10 digits"})
 
-    if ((internData.mobile).charAt(0)= 0 )return res.status(400).send({ status: false, message: "mobile should not start with 0"}) 
+    if ((internData.mobile).charAt(0) == 0 )return res.status(400).send({ status: false, message: "mobile should not start with 0"}) 
 
     let mobileOld = await internModel.findOne({mobile: internData.mobile})
    if (mobileOld != null){{return res.status(400).send({ status: false, message: "mobile already exists" })}}
 
-   // collegeId ?? collegeName
-   if (!internData.collegeId) {return res.status(400).send({ status: false, message: "Please include the collegeId " })}
+   // collegeId ?? collegeName  
+   if (!internData.collegeName) {return res.status(400).send({ status: false, message: "Please include the collegeName" })}
 
-   if ((internData.collegeId).trim().length === 0){return res.status(400).send({ status: false, message: "collegeId can't be empty" })}
+   if ((internData.collegeName).trim().length === 0){return res.status(400).send({ status: false, message: "collegeName can't be empty" })}
 
-   if ((internData.collegeId).includes(" ")){{return res.status(400).send({ status: false, message: "Please remove any empty spaces in collegeId" });}}
+   if ((internData.collegeName).includes(" ")){{return res.status(400).send({ status: false, message: "Please remove any empty spaces in collegeName" });}}
 
-   if (!mongoose.isValidObjectId((internData.collegeId))) return res.status(400).send({ message: "Invalid college Id" })
+   //if (!mongoose.isValidObjectId((internData.collegeId))) return res.status(400).send({ message: "Invalid college Id" })
    
-   let collegeData = await collegeModel.findById((internData.collegeId));
-   
+   let collegeId = await collegeModel.findOne(({name: (internData.collegeName)})).select('_id')
+  
     
-   if (collegeData==null){ return res.status(400).send({ status: false, msg: "Please use right college id" })};
+   if (collegeId==null){ return res.status(400).send({ status: false, msg: "Please use right collegeName" })};
+  //console.log((internData.collegeName))
+  internData['collegeId'] = internData['collegeName'];
+  delete internData['collegeName'];
 
+  //console.log(internData);
 
-   let savedData = await internModel.create(internData);
-   return res.status(201).send({status: true,message: "Data is successfully created", data: savedData,});
+  // delete internData.assign(o, {[collegeId]: o[collegeName] })[collegeName];
+  
+    
+  internData["collegeId"] = (collegeId._id)
 
-
+   let savedData = await internModel.create(internData)
+   let reqData = await internModel.findById(savedData._id).select({_id:0,name:1,email:1,mobile:1, collegeId:1, isDeleted:1});
+    return res.status(201).send({status: true,message: "Data is successfully created", data: reqData,})
     
    
 
-    } catch (err) {
+  } catch (err) {
      console.log("This is the error :", err.message);
      return res.status(500).send({ status: false, message: "Error", error: err.message });
    }
