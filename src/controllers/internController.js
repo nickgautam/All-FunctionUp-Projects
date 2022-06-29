@@ -36,6 +36,10 @@ const createIntern = async function (req, res) {
   if ((internData.email).trim().length === 0) {return res.status(400).send({ status: false, message: "email can't be empty" });} 
   if ((internData.email).includes(" ")){{return res.status(400).send({ status: false, message: "Please remove any empty spaces in email" });}}
 
+  let regex = new RegExp("/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/");
+    if(!regex.test((internData.email))){return res.status(400).send({ status: false, message: "Please use right email"})}
+
+
    let emailOld = await internModel.findOne({email: internData.email})
    if (emailOld != null){{return res.status(400).send({ status: false, message: "email already exists" })}}
 
@@ -43,7 +47,7 @@ const createIntern = async function (req, res) {
    if (!internData.mobile)
               return res.status(400).send({ status: false, message: "Please include the mobile no." });
            
-    //if ( phonenumber(internData.mobile) != "true"){ return res.status(400).send({ status: false, message: "mobile must be  number" });}
+   
     if ((internData.mobile).trim().length === 0){{return res.status(400).send({ status: false, message: "mobile can't be empty" });}}
     
     if ((internData.mobile).includes(" ")){{return res.status(400).send({ status: false, message: "Please remove any empty spaces in mobile" });}}    

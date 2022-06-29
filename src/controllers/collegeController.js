@@ -40,7 +40,7 @@ try {
     if ((collegeData.logoLink).trim().length === 0){{return res.status(400).send({ status: false, message: "logoLink can't be empty" });}}
     if ((collegeData.logoLink).includes(" ")){{return res.status(400).send({ status: false, message: "Please remove any empty spaces in logoLink" });}}
     //validate correct URL- 
-    var regex = new RegExp("^(http[s]?:\\/\\/(www\\.)?|ftp:\\/\\/(www\\.)?|www\\.){1}([0-9A-Za-z-\\.@:%_\+~#=]+)+((\\.[a-zA-Z]{2,3})+)(/(.)*)?(\\?(.)*)?");
+    let regex = new RegExp("^(http[s]?:\\/\\/(www\\.)?|ftp:\\/\\/(www\\.)?|www\\.){1}([0-9A-Za-z-\\.@:%_\+~#=]+)+((\\.[a-zA-Z]{2,3})+)(/(.)*)?(\\?(.)*)?");
     if(!regex.test((collegeData.logoLink))){return res.status(400).send({ status: false, message: "Please use right logolink"})}
 
 
