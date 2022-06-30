@@ -9,11 +9,17 @@ const internController= require("../controllers/internController")
 
 
 
+
 router.post("/functionup/colleges", collegeController.createCollege )
 router.post("/functionup/interns", internController.createIntern )
 router.get("/functionup/collegeDetails",collegeController.collegeDetails)
 
-
+router.all("/**", function (req, res) {
+    res.status(404).send({
+      status: false,
+      msg: "The api you request is not available",
+    });
+  });
 
 
 

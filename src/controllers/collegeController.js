@@ -19,7 +19,7 @@ try {
       return res.status(400).send({ status: false, message: "data can't be empty" })}
     
 
-    if (!collegeData.name)
+    if (!collegeData.name)  
       return res.status(400).send({ status: false, message: "Please include the name" });
     if (typeof (collegeData.name) != "string"){ return res.status(400).send({ status: false, message: "name must be a string" });}
     
@@ -75,8 +75,8 @@ const collegeDetails = async function (req, res) {
       
       let thatCollege = await collegeModel.find({name: requestedCollege.collegeName})   
       if (thatCollege.length == 0)return res.status(400).send({ status: false, message: "no college exists of this collegeName"});
-      let neededId = thatCollege[0].id
-     let interns = await internModel.find({collegeId: neededId}).select({_id: 1,name:1,email:1,mobile:1})
+      let neededId = thatCollege[0].id   
+     let interns = await internModel.find({collegeId: neededId, isDeleted:false}).select({_id: 1,name:1,email:1,mobile:1})
     
     let allTheInterns = interns;
     
