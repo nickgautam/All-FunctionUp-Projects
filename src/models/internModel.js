@@ -7,6 +7,7 @@ const internSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
+        trim: true
         },
         
 
@@ -43,4 +44,4 @@ const internSchema = new mongoose.Schema({
 
 
 
-module.exports = mongoose.model('inter', internSchema)        //interns
+module.exports = mongoose.model('intern', internSchema)        //interns

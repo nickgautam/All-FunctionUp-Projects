@@ -1,11 +1,14 @@
 const collegeModel = require("../models/collegeModel");
 const internModel = require("../models/internModel");
 const mongoose = require ('mongoose');
-// const jwt = require("jsonwebtoken");
+
 function isNum(val){
   return !isNaN(val)
 }
-
+function validateURL(url) {
+  var urlPattern = /^(http(s)?:\/\/)?(www.)?([a-zA-Z0-9])+([\-\.]{1}[a-zA-Z0-9]+)*\.[a-zA-Z]{2,5}(:[0-9]{1,5})?(\/[^\s]*)?$/gm
+  return urlPattern.test(url);
+}
 //--------CREATING A COLLEGE----------------------------------------------->>
 
 
@@ -23,14 +26,14 @@ try {
     if ((collegeData.name).trim().length === 0){{return res.status(400).send({ status: false, message: "name can't be empty" });}}
     if (isNum(collegeData.name) === true) { return res.status(400).send({ status: false, message: "name cannot be a number" });}
     if ((collegeData.name).includes(" ")){{return res.status(400).send({ status: false, message: "Please remove any empty spaces in name" });}}
-    let nameOld = await collegeModel.findOne({name: collegeData.name})
-    if (nameOld != null){{return res.status(400).send({ status: false, message: "name already exists" })}}
+    let collegeNameAlreadyExist  = await collegeModel.findOne({name: collegeData.name})
+    if (collegeNameAlreadyExist  != null){{return res.status(400).send({ status: false, message: "collegeName already exists" })}}
     
     if (!collegeData.fullName)
     return res.status(400).send({ status: false, message: "Please include the full name" });
-    if (typeof (collegeData.fullName) != "string"){ return res.status(400).send({ status: false, message: "fullname must be a string" });}
-    if ((collegeData.fullName).trim().length === 0){{return res.status(400).send({ status: false, message: "full name can't be empty" });}}
-    if (isNum(collegeData.fullName) === true) { return res.status(400).send({ status: false, message: "full name cannot be a number" });}
+    if (typeof (collegeData.fullName) != "string"){ return res.status(400).send({ status: false, message: "fullName must be a string" });}
+    if ((collegeData.fullName).trim().length === 0){{return res.status(400).send({ status: false, message: "fullName can't be empty" });}}
+    if (isNum(collegeData.fullName) === true) { return res.status(400).send({ status: false, message: "fullName cannot be a number" });}
     
 
     //logoLink
@@ -40,13 +43,13 @@ try {
     if ((collegeData.logoLink).trim().length === 0){{return res.status(400).send({ status: false, message: "logoLink can't be empty" });}}
     if ((collegeData.logoLink).includes(" ")){{return res.status(400).send({ status: false, message: "Please remove any empty spaces in logoLink" });}}
     //validate correct URL- 
-    let regex = new RegExp("/(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/");
-    if(!regex.test((collegeData.logoLink))){return res.status(400).send({ status: false, message: "Please use right logolink"})}
+    
+    if((!validateURL(collegeData.logoLink))){return res.status(400).send({ status: false, message: "Please use right logoLink"})} 
   
 
 
     let collegeCreated = await collegeModel.create(collegeData);
-    return res.status(201).send({status: true,message: "data created successfully",data: collegeCreated,});
+    return res.status(201).send({data: collegeCreated,});
   } 
     
 
@@ -74,15 +77,15 @@ const collegeDetails = async function (req, res) {
       if (thatCollege.length == 0)return res.status(400).send({ status: false, message: "no college exists of this collegeName"});
       let neededId = thatCollege[0].id
      let interns = await internModel.find({collegeId: neededId}).select({_id: 1,name:1,email:1,mobile:1})
-    //thatCollege.Interns = interns
+    
     let allTheInterns = interns;
-    //console.log(interns)
+    
     if (interns.length == 0){allTheInterns = "No interns applied at this college"}
 
     let savedData = await collegeModel.findOneAndUpdate({_id: neededId},
       {"$set": {interns : allTheInterns }},
       {new:true}).select({name:1, fullName:1, logoLink:1, _id:0,interns:1}) 
-    return res.status(200).send({status: true,data: savedData});
+    return res.status(200).send({data: savedData});
   } 
  
      
