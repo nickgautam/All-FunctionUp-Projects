@@ -5,7 +5,6 @@ const collegeSchema = new mongoose.Schema({
           type: String,
          required: true,
          unique: true
-
          },
     fullName: {
         type: String,
@@ -19,12 +18,10 @@ const collegeSchema = new mongoose.Schema({
 
     isDeleted: {
             type: Boolean, 
-            default: false},
+            default: false
+        },
     
-
     },
     { timestamps: true });
-        
-        
         
         module.exports = mongoose.model('college', collegeSchema)        //colleges
