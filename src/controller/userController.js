@@ -106,13 +106,11 @@ const userLogin = async function (req, res) {
         if (!email) {
             res.status(400).send({ status: false, message: "email must be present " })
             return
-
         }
 
         if (!password) {
             res.status(400).send({ status: false, message: "password must be present " })
             return
-
         }
 
         const user = await userModel.findOne({ email: email, password: password })
@@ -121,7 +119,6 @@ const userLogin = async function (req, res) {
             res.status(400).send({ status: false, message: "Make sure your login Credentials are correct or not " })
             return
         }
-
 
         const token = await jwt.sign({
             userId: user._id,
@@ -136,8 +133,6 @@ const userLogin = async function (req, res) {
         res.status(500).send({ status: false, message: error.message })
         return
     }
-
-
 }
 
 

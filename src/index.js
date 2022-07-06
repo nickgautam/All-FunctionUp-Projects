@@ -10,7 +10,7 @@ app.use(bodyParser.urlencoded({ extended: true}))
 
 // mongodb+srv://gautam:gautam123@cluster0.xorxp.mongodb.net/gautii
 // mongodb+srv://NishantGautam:Ng123@cluster0.45vj3.mongodb.net/group44Database
-const monngodb_url="mongodb+srv://gautam:gautam123@cluster0.xorxp.mongodb.net/group44Database";
+const monngodb_url="mongodb+srv://NishantGautam:Ng123@cluster0.45vj3.mongodb.net/group44Database";
 
 mongoose.connect(monngodb_url,
     {useNewUrlParser: true})
