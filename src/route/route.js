@@ -1,35 +1,35 @@
 const express = require('express')
-const userModel = require('../model/userModel')
-const bookModel = require('../model/bookModel')
+const userController = require('../controller/userController')
+const bookController = require('../controller/bookController')
 const router = express.Router()
 
+   
+router.post('/register', userController.createUser)
 
-router.post('/register', userModel.createUser)
+// router.post('/login', userController.loginUser)
+   
+// router.post('/books', bookController.createBook)
 
-router.post('/login', userModel.loginUser)
+// router.get('/books', bookController.getBook)
 
-router.post('/books', bookModel.createBook)
+// router.get('/books/:bookId', bookController.getBookById)
 
-router.get('/books', bookModel.getBook)
+// router.put('/books/:bookId', bookController.updateBookById)
 
-router.get('/books/:bookId', bookModel.getBookById)
-
-router.put('/books/:bookId', bookModel.updateBookById)
-
-router.delete('/books/:bookId', bookModel.deleteBookById)
-
-
-router.post('/books/:bookId/review', bookModel.createReview)
+// router.delete('/books/:bookId', bookController.deleteBookById)
 
 
-router.put('/books/:bookId/review/:reviewId', bookModel.updateReviewById)
+// router.post('/books/:bookId/review', bookController.createReview)
 
 
-router.delete('/books/:bookId/review/:reviewId', bookModel.deleteReviewById)
+// router.put('/books/:bookId/review/:reviewId', bookController.updateReviewById)
+
+
+// router.delete('/books/:bookId/review/:reviewId', bookController.deleteReviewById)
 
 
 
-
+module.exports = router
 
 
 
