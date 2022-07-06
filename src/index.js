@@ -10,7 +10,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true}))
 
 
-const monngodb_url="mongodb+srv://naveen-developer:rash47rash2021@naveen-developer.eja8d.mongodb.net/project-blog";
+const monngodb_url="mongodb+srv://naveen-developer:rash47rash2021@naveen-developer.eja8d.mongodb.net/blog-management";
 
 mongoose.connect(monngodb_url, {useNewUrlParser: true,useUnifiedTopology: true})
 
