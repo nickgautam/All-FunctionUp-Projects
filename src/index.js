@@ -1,18 +1,19 @@
 const express =  require('express')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
-
-const route = require('./route/route')
+const route = require('./route/route.js')
 
 const app = express()
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true}))
 
+// mongodb+srv://gautam:gautam123@cluster0.xorxp.mongodb.net/gautii
+// mongodb+srv://NishantGautam:Ng123@cluster0.45vj3.mongodb.net/group44Database
+const monngodb_url="mongodb+srv://gautam:gautam123@cluster0.xorxp.mongodb.net/group44Database";
 
-const monngodb_url="mongodb+srv://naveen-developer:rash47rash2021@naveen-developer.eja8d.mongodb.net/blog-management";
-
-mongoose.connect(monngodb_url, {useNewUrlParser: true,useUnifiedTopology: true})
+mongoose.connect(monngodb_url,
+    {useNewUrlParser: true})
 
 .then(()=>{ console.log("Hi! MongoDB is connected Now ");})
 

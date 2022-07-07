@@ -3,12 +3,12 @@ const userController = require('../controller/userController')
 const bookController = require('../controller/bookController')
 const router = express.Router()
 
+   
+router.post('/register', userController.createUser)
 
-// router.post('/register', userController.createUser)
+router.post('/login', userController.loginUser)
 
-router.post('/login', userController.userLogin)
-
-// router.post('/books', bookController.createBook)
+router.post('/books', bookController.createBook)
 
 // router.get('/books', bookController.getBook)
 
@@ -30,6 +30,7 @@ router.post('/login', userController.userLogin)
 
 
 
+module.exports = router
 
 
 
