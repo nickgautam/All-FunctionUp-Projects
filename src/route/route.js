@@ -11,11 +11,11 @@ router.post('/register', userController.createUser)
 
 router.post('/books', auth.authentication, auth.authorisation1, bookController.createBook)
 
-router.get('/books', bookController.getBook)
+router.get('/books', auth.authentication, bookController.getBook)
 
 // router.get('/books/:bookId', bookController.getBookById)
 
-// router.put('/books/:bookId', bookController.updateBookById)
+router.put('/books/:bookId', auth.authentication,auth.authorisation2, bookController.updateBookById)
 
 // router.delete('/books/:bookId', bookController.deleteBookById)
 

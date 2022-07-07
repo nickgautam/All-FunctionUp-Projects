@@ -1,3 +1,17 @@
+
+//*******************validation for empty body******************/
+
+const isValidBody = function (value){
+        if (Object.keys(value).length == 0) return false
+
+        return true
+
+}
+
+
+
+
+
 function isNum(val) {
     return !isNaN(val)
 }
@@ -13,5 +27,6 @@ let regexPincode = /^\d{6}$/
 let regexEmail = /^[a-z0-9]{2,}@+[a-z]{3,5}\.[a-z]{2,3}$/
 
 
-module.exports= {isNum, isValidString }
+module.exports= { isValidBody ,isNum, isValidString }
 module.exports= { regexName, regexPhone, regexPincode, regexEmail}
+

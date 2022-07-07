@@ -44,10 +44,7 @@ const bookSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
-    releasedAt: {
-        type : Date, 
-        required : true
-        },
+   
     isDeleted: {
         type: Boolean,
         default: false
@@ -60,4 +57,4 @@ const bookSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-module.exports = mongoose.model('Book', bookSchema)//books
+module.exports = mongoose.model('Book', bookSchema) 

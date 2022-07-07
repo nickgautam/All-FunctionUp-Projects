@@ -1,13 +1,20 @@
 const { default: mongoose } = require("mongoose")
 const bookModel = require("../model/bookModel")
-const userModel = require("../model/userModel")
+const valid = require('../validation/validation')
 const moment = require("moment")
-const jwt = require('jsonwebtoken');
+
+const isValidBody = function (value) {
+    if (Object.keys(value).length == 0) return false
+    return true
+}
+
 
 
 function isNum(val) {
     return !isNaN(val)
 }
+
+
 const isValidString = function (value) {
     if (typeof value === "undefined" || value === null) return false
     if (typeof value !== "string" || value.trim().length === 0) return false
@@ -24,6 +31,7 @@ const validateSubCategory = (subcategory) => {
 }
 
 //---------------------- create book ------------------------
+
 const createBook = async function (req, res) {
     try {
         let data = req.body
@@ -170,27 +178,97 @@ const createBook = async function (req, res) {
 
 }
 
-//------------------------- get book ------------------------
+
+
+//***************************************** getBook **********************************************************/
+
 
 const getBook = async function (req, res) {
     try {
+        let data = req.query;
+       const { userId, category, subcategory} = data;
+       
+       let filterQuery ={ isDeleted: false}
+       if(userId){
+        filterQuery["userId"]= req.query.userId
+       }
 
-        let tokenId = req.token.userId
-        let getData = await bookModel.find({userId : tokenId, isDeleted: false})
-        if(getData[0].length==0){
-            return res.status(400).send({
-                status:false,
-                message: "no any books find"
+       if(category){
+        filterQuery["category"]= req.query.category
+       }
+
+       if(subcategory){
+        filterQuery["subcategory"]= req.query.subcategory   
+       }
+        
+       let allbooks = await bookModel.find(filterQuery)
+       console.log(allbooks)
+       if(allbooks.length==0) return res.status(404).send({status: false, message:"No book found"})
+
+       res.status(200).send({status:true, message: "Book List" , data: allbooks})
+
+    } catch (err) {
+        console.log(err.message)
+        return res.status(500).send({
+            status: false,
+            message: err.message
+        })
+    }
+}
+
+//***************************************** updateBookById **********************************************************/
+
+
+
+const updateBookById = async function (req, res) {
+
+    try {
+
+        const data = req.body
+
+        let bookId = req.params.bookId
+
+        const { title, excerpt, releaseAt, ISBN } = data
+
+        if (!isValidBody(data)) {
+            res.status(400).send({
+                status: false,
+                message: "All feild can't be empty"
             })
         }
-        return res.status(200).send({
-            status: true,
-            message: 'Books list',
-            data: getData
-        })
 
-    }
-    catch (err) {
+
+        if (title) {
+            const checkTitle = await bookModel.findOne({ title: title })
+            if (checkTitle) {
+                res.status(400).send({
+                    status: false,
+                    message: "book already present with this title"
+                })
+            }
+        }
+
+        if (ISBN) {
+            const checkISBN = await bookModel.findOne({ ISBN: ISBN })
+            if (checkISBN) {
+                res.status(400).send({
+                    status: false,
+                    message: "book already present with this ISBN"
+                })
+            }
+        }
+
+
+        const updateData = await bookModel.findOneAndUpdate(
+            { _id: bookId, isDeleted: false },
+            { $set: data },
+            { new: true })
+        console.log(updateData);
+        res.status(200).send({ status: true, message: "success", data: updateData })
+        return
+
+
+    } catch (err) {
         console.log(err.message)
         return res.status(500).send({
             status: false,
@@ -203,3 +281,4 @@ const getBook = async function (req, res) {
 
 module.exports.createBook = createBook
 module.exports.getBook = getBook
+module.exports.updateBookById = updateBookById

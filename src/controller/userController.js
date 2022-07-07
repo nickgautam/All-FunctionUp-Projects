@@ -1,5 +1,5 @@
 const userModel = require('../model/userModel')
-const jwt = require("jsonwebtoken");
+const vd = require('../validation/validation')
 
 function isNum(val) {
     return !isNaN(val)
@@ -27,6 +27,8 @@ let regexName =    /^[A-Za-z. -]+$/
 let regexPhone = /^[6789]\d{9}$/
 let regexPincode = /^\d{6}$/
 let regexEmail = /^[a-z0-9.]{2,}@+[a-z]{3,5}\.[a-z]{2,3}$/ //"nk@gmail.com"
+
+//***************************************** createUser **********************************************************/
 
 const createUser = async function (req, res) {
 
@@ -159,6 +161,8 @@ const createUser = async function (req, res) {
     } catch (err) { return res.status(500).send({ status: false, message: err.message }) }
 }
 
+
+//*****************************************LoginUser **********************************************************/
 
 const userLogin = async function (req, res) {
 
