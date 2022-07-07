@@ -1,6 +1,8 @@
 const { default: mongoose } = require("mongoose")
 const bookModel = require("../model/bookModel")
+const userModel = require("../model/userModel")
 const moment = require("moment")
+const jwt = require('jsonwebtoken');
 
 
 function isNum(val) {
@@ -21,8 +23,7 @@ const validateSubCategory = (subcategory) => {
     return subcategory
 }
 
-
-
+//---------------------- create book ------------------------
 const createBook = async function (req, res) {
     try {
         let data = req.body
@@ -41,7 +42,7 @@ const createBook = async function (req, res) {
                 message: "title is mandatory"
             })
         }
-        if(!isValidString(title)){
+        if (!isValidString(title)) {
             return res.status(400).send({
                 status: false,
                 message: "title should be string & can't be empty"
@@ -61,7 +62,7 @@ const createBook = async function (req, res) {
                 message: "excerpt is mandatory"
             })
         }
-        if(!isValidString(excerpt)){
+        if (!isValidString(excerpt)) {
             return res.status(400).send({
                 status: false,
                 message: "excerpt should be string & can't be empty"
@@ -74,7 +75,7 @@ const createBook = async function (req, res) {
                 message: "userId is mandatory"
             })
         }
-        if(!mongoose.isValidObjectId(userId)){
+        if (!mongoose.isValidObjectId(userId)) {
             return res.status(400).send({
                 status: false,
                 message: "userId is invalid"
@@ -87,8 +88,8 @@ const createBook = async function (req, res) {
                 message: "ISBN is mandatory"
             })
         }
-        let validISBN = /^[0-9]{3}\-[0-9]{1}\-[0-9]{6}\-[0-9]{2}\-[0-9]{1}$/ 
-        
+        let validISBN = /^[0-9]{3}\-[0-9]{1}\-[0-9]{6}\-[0-9]{2}\-[0-9]{1}$/
+
 
         // /^(?=.*[0-9])(?=.*[-])[0-9-]{1,13}$/
         //  /^(?=.*[0-9]{13})(?=.*[-]{4})$/
@@ -97,15 +98,15 @@ const createBook = async function (req, res) {
         // ^[\d*\-]{10}|[\d*\-]{13}$
         // ISBN-10     0-123456-47-9
         //ISBN-13       978-0-123456-47-2
-       
-        if(!validISBN.test(ISBN)){
+
+        if (!validISBN.test(ISBN)) {
             return res.status(400).send({
                 status: false,
                 message: "ISBN should be 13 digits & format should look like:  978-0-123456-47-2"
             })
         }
-    
-       
+
+
         let checkISBN = await bookModel.findOne({ ISBN: ISBN })
         if (checkISBN) {
             return res.status(400).send({
@@ -120,16 +121,16 @@ const createBook = async function (req, res) {
                 message: "category is mandatory"
             })
         }
-        if(!isValidString(category)){
+        if (!isValidString(category)) {
             return res.status(400).send({
                 status: false,
                 message: "category should be string & can't be empty"
             })
         }
         if (isNum(category) == true) {
-            return res.status(400).send({ 
-                status: false, 
-                message: "category can't be a number" 
+            return res.status(400).send({
+                status: false,
+                message: "category can't be a number"
             })
         }
 
@@ -150,9 +151,9 @@ const createBook = async function (req, res) {
         //     })
         // }
 
-        data.releasedAt=moment().format("YYYY-MM-DD")
-
+        data.releasedAt = moment().format("YYYY-MM-DDThh:mm:ss.SSS[Z]")
         let saveData = await bookModel.create(data)
+
         return res.status(201).send({
             status: true,
             message: "Success",
@@ -169,6 +170,53 @@ const createBook = async function (req, res) {
 
 }
 
+//------------------------- get book ------------------------
+
+const getBook = async function (req, res) {
+    try {
+
+        let token = req.headers["x-Api-Key"];
+        if (!token) token = req.headers["x-api-key"];
+        if (!token) return res.status(400).send({ status: false, msg: "token must be present" });
+        jwt.verify(token, "my@third@project@book@management", (err, decoded) => {
+            //Only if token validation Fails
+            if (err) {
+                return res.status(401).send({
+                    status: false,
+                    message : "authentication failed"
+                })
+            }//If token validaion Passes
+            else {
+                //Attribute to store the value of decoded token 
+                req.token = decoded
+            }
+        })
+
+        let tokenId = req.token.userId
+        let getData = await bookModel.find({userId : tokenId, isDeleted: false})
+        if(getData[0].length==0){
+            return res.status(400).send({
+                status:false,
+                message: "no any books find"
+            })
+        }
+        return res.status(200).send({
+            status: true,
+            message: 'Books list',
+            data: getData
+        })
+
+    }
+    catch (err) {
+        console.log(err.message)
+        return res.status(500).send({
+            status: false,
+            message: err.message
+        })
+    }
+}
+
+
+
 module.exports.createBook = createBook
-
-
+module.exports.getBook = getBook

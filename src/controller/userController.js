@@ -1,4 +1,6 @@
 const userModel = require('../model/userModel')
+const jwt = require('jsonwebtoken');
+
 function isNum(val) {
     return !isNaN(val)
 }
@@ -14,9 +16,9 @@ const isValidString = function (value) {
 //                        (?=.*[!@#$%^&*]) atleast one special charactor
 //                         [a-zA-Z0-9!@#$%^&*]{4,16} length in b/w in 4 to 16 and any char belongs to [a-zA-Z0-9!@#$%^&*]
 const validatePassword = (password, res) => {
-    let regex = /^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{4,16}$/
+    let regex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{4,16}$/
     if (!regex.test(password)) {
-        res.status(400).send({ status: false, msg: "Password is mandatory & must contain atleast one uppercase, one lowercase, one special character, there should not be any space and length of password must be in range [4-16]" })
+        res.status(400).send({ status: false, msg: "Password contain one lowercase, one special character, there should not be any space and length of password must be in range [4-16]" })
         return false;
     }
     return true;
