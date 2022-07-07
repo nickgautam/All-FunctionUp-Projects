@@ -1,5 +1,7 @@
 const userModel = require('../model/userModel')
 const vd = require('../validation/validation')
+const jwt = require("jsonwebtoken");
+
 
 function isNum(val) {
     return !isNaN(val)
@@ -197,7 +199,7 @@ const userLogin = async function (req, res) {
             exp: Math.floor(Date.now() / 1000) + 10 * 60 * 60
         }, "my@third@project@book@management")
 
-        res.header('x-api-key', token)
+        res.setHeader('x-api-key', token)
         res.status(200).send({ status: true, message: 'user login successfull', token: token })
 
     } catch (error) {

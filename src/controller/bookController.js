@@ -216,8 +216,40 @@ const getBook = async function (req, res) {
     }
 }
 
-//***************************************** updateBookById **********************************************************/
 
+//***************************************** getBookById **********************************************************/
+
+
+const getBookById = async function (req, res){
+    try{
+        let bookId = req.params.bookId
+
+        let allBooks = await bookModel.findById(bookId)
+        if(!allBooks){
+            return res.status(404).send({
+                status: false,
+                message: "no books found"
+            })
+        }
+        return res.status(200).send({
+            status: true,
+            message : "Book List",
+            data: allBooks
+        })
+
+    }
+    catch (err) {
+        console.log(err.message)
+        return res.status(500).send({
+            status: false,
+            message: err.message
+        })
+    }
+}
+
+
+
+//***************************************** updateBookById **********************************************************/
 
 
 const updateBookById = async function (req, res) {
@@ -270,6 +302,12 @@ const updateBookById = async function (req, res) {
         }
 
         const updateData = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, updateQuery, { new: true })
+        if(!updateData){
+            return res.status(404).send({
+                status: false,
+                message: "book not found"
+            })
+        }
 
         res.status(200).send({ status: true, message: "success", data: updateData })
         return
@@ -294,4 +332,5 @@ const updateBookById = async function (req, res) {
 
 module.exports.createBook = createBook
 module.exports.getBook = getBook
+module.exports.getBookById = getBookById
 module.exports.updateBookById = updateBookById

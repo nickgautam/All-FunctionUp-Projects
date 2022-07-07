@@ -13,9 +13,9 @@ router.post('/books', auth.authentication, auth.authorisationCreateBook, bookCon
 
 router.get('/books', auth.authentication, bookController.getBook)
 
-// router.get('/books/:bookId', bookController.getBookById)
+router.get('/books/:bookId',auth.authentication, auth.authorisationByParams, bookController.getBookById)
 
-router.put('/books/:bookId', auth.authentication,auth.authorisationByParams, bookController.updateBookById)
+router.put('/books/:bookId', auth.authentication, auth.authorisationByParams, bookController.updateBookById)
 
 // router.delete('/books/:bookId', bookController.deleteBookById)
 
