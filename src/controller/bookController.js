@@ -9,6 +9,7 @@ const isValidBody = function (value) {
 }
 
 
+
 function isNum(val) {
     return !isNaN(val)
 }
@@ -29,8 +30,7 @@ const validateSubCategory = (subcategory) => {
     return subcategory
 }
 
-//***************************************** createBook **********************************************************/
-
+//---------------------- create book ------------------------
 
 const createBook = async function (req, res) {
     try {
@@ -96,8 +96,8 @@ const createBook = async function (req, res) {
                 message: "ISBN is mandatory"
             })
         }
-        let validISBN = /^[0-9]{3}\-[0-9]{1}\-[0-9]{6}\-[0-9]{2}\-[0-9]{1}$/
-
+        let validISBN = /^[0-9]{3}\-[0-9]{1}\-[0-9]{6}\-[0-9]{2}\-[0-9]{1}$/ 
+        //let validISBN2 = /^[0-9]{1}\-[0-9]{6}\-[0-9]{2}\-[0-9]{1}$/
 
         // /^(?=.*[0-9])(?=.*[-])[0-9-]{1,13}$/
         //  /^(?=.*[0-9]{13})(?=.*[-]{4})$/
@@ -159,13 +159,12 @@ const createBook = async function (req, res) {
         //     })
         // }
 
-        data.releasedAt = moment().format("YYYY-MM-DDThh:mm:ss.SSS[Z]")
-
-
+        data.releasedAt = moment().format("YYYY-MM-DD")
         let saveData = await bookModel.create(data)
+
         return res.status(201).send({
             status: true,
-            message: "Success",
+            message: "Success",   
             data: saveData
         })
     }
@@ -181,7 +180,44 @@ const createBook = async function (req, res) {
 
 
 
-//***************************************** createBook **********************************************************/
+//***************************************** getBook **********************************************************/
+
+
+const getBook = async function (req, res) {
+    try {
+        let data = req.query;
+       const { userId, category, subcategory} = data;
+       
+       let filterQuery ={ isDeleted: false}
+       if(userId){
+        filterQuery["userId"]= req.query.userId
+       }
+
+       if(category){
+        filterQuery["category"]= req.query.category
+       }
+
+       if(subcategory){
+        filterQuery["subcategory"]= req.query.subcategory   
+       }
+        
+       let allbooks = await bookModel.find(filterQuery)
+       console.log(allbooks)
+       if(allbooks.length==0) return res.status(404).send({status: false, message:"No book found"})
+
+       res.status(200).send({status:true, message: "Book List" , data: allbooks})
+
+    } catch (err) {
+        console.log(err.message)
+        return res.status(500).send({
+            status: false,
+            message: err.message
+        })
+    }
+}
+
+//***************************************** updateBookById **********************************************************/
+
 
 
 const updateBookById = async function (req, res) {
@@ -212,18 +248,10 @@ const updateBookById = async function (req, res) {
         //     })
         // }
 
-        console.log(id);
+   
 
 
-        const checkBookId = await bookModel.findById({ bookId })
-        if (!checkBookId) {
-            res.status(404).send({
-                status: false,
-                message: "Sorry! No Book found "
-            })
-        }
-
-
+     
 
         if (title) {
             const checkTitle = await bookModel.findOne({ title: title })
@@ -266,16 +294,6 @@ const updateBookById = async function (req, res) {
 
 
 
-
-
-
-
-
-
-
 module.exports.createBook = createBook
+module.exports.getBook = getBook
 module.exports.updateBookById = updateBookById
-
-
-
-
