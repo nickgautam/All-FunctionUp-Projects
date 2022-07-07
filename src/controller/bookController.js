@@ -221,7 +221,6 @@ const getBook = async function (req, res) {
 
 
 const updateBookById = async function (req, res) {
-
     try {
         const data = req.body
         let bookId = req.params.bookId
@@ -232,17 +231,6 @@ const updateBookById = async function (req, res) {
         if(title){
             updateQuery["title"]= title;
 
-        const { title, excerpt, releaseAt, ISBN } = data
-
-        if (!isValidBody(data)) {
-            res.status(400).send({
-                status: false,
-                message: "All feild can't be empty"
-            })
-        }
-
-
-        if (title) {
             const checkTitle = await bookModel.findOne({ title: title })
             if (checkTitle) {
                 res.status(400).send({
@@ -274,21 +262,20 @@ const updateBookById = async function (req, res) {
 
         console.log(updateQuery)
 
-        if (Object.keys(data).length==0) {
+        if (Object.keys(data).length == 0) {
             res.status(400).send({
                 status: false,
                 message: "All request body field can't be empty"
             })
         }
 
-        const updateData = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false },updateQuery,{ new: true })
-        
+        const updateData = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, updateQuery, { new: true })
+
         res.status(200).send({ status: true, message: "success", data: updateData })
         return
 
-
-    
-}    catch (err) {
+    }
+    catch (err) {
         console.log(err.message)
         return res.status(500).send({
             status: false,
@@ -296,6 +283,12 @@ const updateBookById = async function (req, res) {
         })
     }
 }
+    
+
+
+
+
+
 
 
 
