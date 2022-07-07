@@ -1,8 +1,7 @@
 const { default: mongoose } = require("mongoose")
 const bookModel = require("../model/bookModel")
-const userModel = require("../model/userModel")
 const moment = require("moment")
-const jwt = require('jsonwebtoken');
+
 
 
 function isNum(val) {
@@ -174,40 +173,29 @@ const createBook = async function (req, res) {
 
 const getBook = async function (req, res) {
     try {
+        let data = req.query;
+       const { userId, category, subcategory} = data;
+       
+       let filterQuery ={ isDeleted: false}
+       if(userId){
+        filterQuery["userId"]= req.query.userId
+       }
 
-        let token = req.headers["x-Api-Key"];
-        if (!token) token = req.headers["x-api-key"];
-        if (!token) return res.status(400).send({ status: false, msg: "token must be present" });
-        jwt.verify(token, "my@third@project@book@management", (err, decoded) => {
-            //Only if token validation Fails
-            if (err) {
-                return res.status(401).send({
-                    status: false,
-                    message : "authentication failed"
-                })
-            }//If token validaion Passes
-            else {
-                //Attribute to store the value of decoded token 
-                req.token = decoded
-            }
-        })
+       if(category){
+        filterQuery["category"]= req.query.category
+       }
 
-        let tokenId = req.token.userId
-        let getData = await bookModel.find({userId : tokenId, isDeleted: false})
-        if(getData[0].length==0){
-            return res.status(400).send({
-                status:false,
-                message: "no any books find"
-            })
-        }
-        return res.status(200).send({
-            status: true,
-            message: 'Books list',
-            data: getData
-        })
+       if(subcategory){
+        filterQuery["subcategory"]= req.query.subcategory   
+       }
+        
+       let allbooks = await bookModel.find(filterQuery)
+       console.log(allbooks)
+       if(allbooks.length==0) return res.status(404).send({status: false, message:"No book found"})
 
-    }
-    catch (err) {
+       res.status(200).send({status:true, message: "Book List" , data: allbooks})
+
+    } catch (err) {
         console.log(err.message)
         return res.status(500).send({
             status: false,
