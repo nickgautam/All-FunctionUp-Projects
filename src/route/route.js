@@ -6,7 +6,7 @@ const router = express.Router()
    
 router.post('/register', userController.createUser)
 
-router.post('/login', userController.loginUser)
+// router.post('/login', userController.loginUser)
 
 router.post('/books', bookController.createBook)
 
@@ -14,7 +14,7 @@ router.post('/books', bookController.createBook)
 
 // router.get('/books/:bookId', bookController.getBookById)
 
-// router.put('/books/:bookId', bookController.updateBookById)
+router.put('/books/:bookId', bookController.updateBookById)
 
 // router.delete('/books/:bookId', bookController.deleteBookById)
 

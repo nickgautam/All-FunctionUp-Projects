@@ -27,11 +27,7 @@ const bookSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true,
-<<<<<<< HEAD
-        trim:true
-=======
         trim: true
->>>>>>> 7a5bf8d126c016086674d9eb3f316aabd02dc441
     },
     subcategory: {
         type: [
@@ -48,6 +44,12 @@ const bookSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    releasedAt: {
+        type: Date,
+        required: true,
+    },
+
+
     isDeleted: {
         type: Boolean,
         default: false
@@ -55,4 +57,4 @@ const bookSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-module.exports = mongoose.model('Book', bookSchema)//books
+module.exports = mongoose.model('Book', bookSchema) 
