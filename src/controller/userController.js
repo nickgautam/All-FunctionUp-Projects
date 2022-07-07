@@ -4,14 +4,28 @@ function isNum(val) {
 }
 const isValidString = function (value) {
     if (typeof value === "undefined" || value === null) return false
-    if (typeof value !== "string" || value.trim().length === 0) return false
+    if (typeof value !== "string" || value.trim().length === 0) return false //"   "
     return true;
 }
 
-let regexName = /^[A-Za-z. -]+$/
+//                        (?=.*[0-9]) atleast one digit 
+//                        (?=.*[A-Z]) atleast one uppercase letter
+//                        (?=.*[a-z]) atleast one lowercase letter
+//                        (?=.*[!@#$%^&*]) atleast one special charactor
+//                         [a-zA-Z0-9!@#$%^&*]{4,16} length in b/w in 4 to 16 and any char belongs to [a-zA-Z0-9!@#$%^&*]
+const validatePassword = (password, res) => {
+    let regex = /^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{4,16}$/
+    if (!regex.test(password)) {
+        res.status(400).send({ status: false, msg: "Password is mandatory & must contain atleast one uppercase, one lowercase, one special character, there should not be any space and length of password must be in range [4-16]" })
+        return false;
+    }
+    return true;
+}                       
+
+let regexName =    /^[A-Za-z. -]+$/   
 let regexPhone = /^[6789]\d{9}$/
 let regexPincode = /^\d{6}$/
-let regexEmail = /^[a-z0-9]{2,}@+[a-z]{3,5}\.[a-z]{2,3}$/
+let regexEmail = /^[a-z0-9.]{2,}@+[a-z]{3,5}\.[a-z]{2,3}$/ //"nk@gmail.com"
 
 //***************************************** createUser **********************************************************/
 
@@ -63,19 +77,9 @@ const createUser = async function (req, res) {
             })
         }
 
-        if (!phone) {
-            return res.status(400).send({
-                status: false,
-                message: "phone is mandatory"
-            })
-        }
+        if (!phone) return res.status(400).send({ status: false, message: "phone is mandatory" })
 
-        if (!regexPhone.test(phone)) {
-            return res.status(400).send({
-                status: false,
-                message: "phone is invalid"
-            })
-        }
+        if (!regexPhone.test(phone)) return res.status(400).send({ status: false, message: "phone is invalid" })
 
         let checkPhone = await userModel.findOne({ phone: phone })
 
@@ -93,15 +97,10 @@ const createUser = async function (req, res) {
             })
         }
 
-        if (!isValidString(email)) { return res.status(400).send({ status: false, message: "email should be a string, shouldn't have whitespace" }) }
+        if (!regexEmail.test(email)) { return res.status(400).send({ status: false, message: "email should look like this anything@anything.com, and should not any space" }) }
 
-        if (!regexEmail.test(email)) {
-            return res.status(400).send({
-                status: false,
-                message: "email should look like this anything@anything.com, and should not any space"
-            })
-        }
-
+        if (!isValidString(email)) return res.status(400).send({ status: false, message: "email should be a string, shouldn't have whitespace" })
+          
         let checkEmail = await userModel.findOne({ email: email })
         if (checkEmail) {
             return res.status(400).send({
@@ -117,12 +116,11 @@ const createUser = async function (req, res) {
             })
         }
 
+        if (password !== undefined)
+            if (!validatePassword(password, res)) return;
+
         if (address) {
-            if (Object.keys(address).length == 0) {
-                return res.status(400).send({
-                    status: false, message: "address is mandatory, can't be empty"
-                })
-            }
+            if (Object.keys(address).length == 0) return res.status(400).send({ status: false, message: "address can't be empty" })
 
             if (!isValidString(address.street)) {
                 return res.status(400).send({
@@ -138,12 +136,7 @@ const createUser = async function (req, res) {
                 })
             }
 
-            if (!isValidString(address.pincode)) {
-                return res.status(400).send({
-                    status: false,
-                    message: "pincode should be a string, inside quotes, and shouldn't have whitespace"
-                })
-            }
+           if (!isValidString(address.pincode)) return res.status(400).send({ status: false, message: "pincode should be a number, inside quotes, and shouldn't have whitespace" })
 
             if (isNum(address.city) == true) {
                 return res.status(400).send({
@@ -177,10 +170,8 @@ const userLogin = async function (req, res) {
 
     try {
         if (Object.keys(loginData).length == 0) {
-            return res.status(400).send({ 
-                status: false, 
-                message: "login credentials must be presents " 
-            })
+            res.status(400).send({ status: false, message: "login credentials must be presents & only email and password should be inside body" })
+            return
         }
         if (!email) {
             return res.status(400).send({ 
