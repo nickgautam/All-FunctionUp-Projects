@@ -9,13 +9,13 @@ router.post('/register', userController.createUser)
 
  router.post('/login', userController.userLogin)
 
-router.post('/books', auth.authentication, auth.authorisation1, bookController.createBook)
+router.post('/books', auth.authentication, auth.authorisationCreateBook, bookController.createBook)
 
 router.get('/books', auth.authentication, bookController.getBook)
 
 // router.get('/books/:bookId', bookController.getBookById)
 
-router.put('/books/:bookId', auth.authentication,auth.authorisation2, bookController.updateBookById)
+router.put('/books/:bookId', auth.authentication,auth.authorisationByParams, bookController.updateBookById)
 
 // router.delete('/books/:bookId', bookController.deleteBookById)
 
