@@ -16,7 +16,7 @@ const authentication = async function (req, res, next) {
       jwt.verify(token, "my@third@project@book@management", function(error){
    if(error) return res.status(401).send({status: false, message: "Token is invalid"})
         });     
-
+    
     } catch (error) {return res.status(500).send({ status: false, message: error.message })};
 
     next();      

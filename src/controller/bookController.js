@@ -17,7 +17,7 @@ function isNum(val) {
 
 const isValidString = function (value) {
     if (typeof value === "undefined" || value === null) return false
-    if (typeof value !== "string" || value.trim().length === 0) return false
+    if (typeof value !== "string" || value.trim().length === 0) return false //""
     return true;
 }
 
@@ -34,13 +34,13 @@ const validateSubCategory = (subcategory) => {
 
 const createBook = async function (req, res) {
     try {
-        let data = req.body
-        let { title, excerpt, userId, ISBN, category, subcategory } = data
+        let data = req.body      
+        let { title, excerpt, userId, ISBN, category, subcategory } = data       
 
         if (Object.keys(data).length == 0) {
             return res.status(400).send({
                 status: false,
-                message: "please provide input"
+                message: "please provide input in request body"
             })
         }
 
@@ -150,7 +150,7 @@ const createBook = async function (req, res) {
             })
         }
 
-        if (req.body.subcategory !== undefined)
+        if (subcategory !== undefined)
             req.body.subcategory = validateSubCategory(req.body.subcategory)
         // if(subcategory.length==0){
         //     return res.status(400).send({
@@ -206,7 +206,7 @@ const getBook = async function (req, res) {
         if (allbooks.length == 0) return res.status(404).send({ status: false, message: "No book found" })
 
         res.status(200).send({ status: true, message: "Book List", data: allbooks })
-
+    
     } catch (err) {
         console.log(err.message)
         return res.status(500).send({
