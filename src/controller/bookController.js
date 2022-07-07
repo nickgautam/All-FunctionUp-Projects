@@ -150,11 +150,11 @@ const createBook = async function (req, res) {
         //     })
         // }
 
-        data.releasedAt= Date.now()
+        data.releasedAt= moment().format("YYYY-MM-DD")
         let saveData = await bookModel.create(data)
         return res.status(201).send({
             status: true,
-            message: "Success",
+            message: "Success",   
             data: saveData
         })
     }
