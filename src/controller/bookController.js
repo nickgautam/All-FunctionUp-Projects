@@ -88,8 +88,8 @@ const createBook = async function (req, res) {
                 message: "ISBN is mandatory"
             })
         }
-        let validISBN = /^[0-9]{3}\-[0-9]{1}\-[0-9]{6}\-[0-9]{2}\-[0-9]{1}$/
-
+        let validISBN = /^[0-9]{3}\-[0-9]{1}\-[0-9]{6}\-[0-9]{2}\-[0-9]{1}$/ 
+        //let validISBN2 = /^[0-9]{1}\-[0-9]{6}\-[0-9]{2}\-[0-9]{1}$/
 
         // /^(?=.*[0-9])(?=.*[-])[0-9-]{1,13}$/
         //  /^(?=.*[0-9]{13})(?=.*[-]{4})$/
@@ -151,12 +151,12 @@ const createBook = async function (req, res) {
         //     })
         // }
 
-        data.releasedAt = moment().format("YYYY-MM-DDThh:mm:ss.SSS[Z]")
+        data.releasedAt = moment().format("YYYY-MM-DD")
         let saveData = await bookModel.create(data)
 
         return res.status(201).send({
             status: true,
-            message: "Success",
+            message: "Success",   
             data: saveData
         })
     }
