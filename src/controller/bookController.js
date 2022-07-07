@@ -175,23 +175,6 @@ const createBook = async function (req, res) {
 const getBook = async function (req, res) {
     try {
 
-        let token = req.headers["x-Api-Key"];
-        if (!token) token = req.headers["x-api-key"];
-        if (!token) return res.status(400).send({ status: false, msg: "token must be present" });
-        jwt.verify(token, "my@third@project@book@management", (err, decoded) => {
-            //Only if token validation Fails
-            if (err) {
-                return res.status(401).send({
-                    status: false,
-                    message : "authentication failed"
-                })
-            }//If token validaion Passes
-            else {
-                //Attribute to store the value of decoded token 
-                req.token = decoded
-            }
-        })
-
         let tokenId = req.token.userId
         let getData = await bookModel.find({userId : tokenId, isDeleted: false})
         if(getData[0].length==0){
