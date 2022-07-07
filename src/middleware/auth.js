@@ -29,7 +29,7 @@ module.exports.authentication = authentication
 
 /*--------------------------------------Authoraisation for create book Api--------------------------------*/
 
-const authorisation1 = async function (req, res, next) {
+const authorisationCreateBook = async function (req, res, next) {
     try {
         let token = req.headers["x-api-key"];
         if (!token) {
@@ -49,13 +49,13 @@ const authorisation1 = async function (req, res, next) {
         }catch (err) {res.status(500).send({status:false, message: err.message })}
         next();
 }
-module.exports.authorisation1 = authorisation1;
+module.exports.authorisationCreateBook = authorisationCreateBook;
 
 
 
 /*--------------------------------------Authoraisation for update books and delete books Api--------------------------------*/
 
-const authorisation2 = async function (req, res, next) {
+const authorisationByParams = async function (req, res, next) {
     try {
         let token = req.headers["x-api-key"];
         if (!token) {
@@ -82,4 +82,4 @@ const authorisation2 = async function (req, res, next) {
         }catch (err) {res.status(500).send({status:false, message: err.message })}
         next();
 }
-module.exports.authorisation2 = authorisation2;   
+module.exports.authorisationByParams = authorisationByParams;   

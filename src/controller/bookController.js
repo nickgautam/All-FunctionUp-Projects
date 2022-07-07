@@ -3,10 +3,10 @@ const bookModel = require("../model/bookModel")
 const valid = require('../validation/validation')
 const moment = require("moment")
 
-const isValidBody = function (value) {
-    if (Object.keys(value).length == 0) return false
-    return true
-}
+// const isValidBody = function (value) {
+//     if (Object.keys(value).length == 0) return false
+//     return true
+// }
 
 
 
@@ -96,7 +96,7 @@ const createBook = async function (req, res) {
                 message: "ISBN is mandatory"
             })
         }
-        let validISBN = /^[0-9]{3}\-[0-9]{1}\-[0-9]{6}\-[0-9]{2}\-[0-9]{1}$/ 
+        let validISBN = /^[0-9]{3}\-[0-9]{1}\-[0-9]{6}\-[0-9]{2}\-[0-9]{1}$/
         //let validISBN2 = /^[0-9]{1}\-[0-9]{6}\-[0-9]{2}\-[0-9]{1}$/
 
         // /^(?=.*[0-9])(?=.*[-])[0-9-]{1,13}$/
@@ -164,7 +164,7 @@ const createBook = async function (req, res) {
 
         return res.status(201).send({
             status: true,
-            message: "Success",   
+            message: "Success",
             data: saveData
         })
     }
@@ -186,26 +186,26 @@ const createBook = async function (req, res) {
 const getBook = async function (req, res) {
     try {
         let data = req.query;
-       const { userId, category, subcategory} = data;
-       
-       let filterQuery ={ isDeleted: false}
-       if(userId){
-        filterQuery["userId"]= req.query.userId
-       }
+        const { userId, category, subcategory } = data;
 
-       if(category){
-        filterQuery["category"]= req.query.category
-       }
+        let filterQuery = { isDeleted: false }
+        if (userId) {
+            filterQuery["userId"] = req.query.userId
+        }
 
-       if(subcategory){
-        filterQuery["subcategory"]= req.query.subcategory   
-       }
-        
-       let allbooks = await bookModel.find(filterQuery)
-       console.log(allbooks)
-       if(allbooks.length==0) return res.status(404).send({status: false, message:"No book found"})
+        if (category) {
+            filterQuery["category"] = req.query.category
+        }
 
-       res.status(200).send({status:true, message: "Book List" , data: allbooks})
+        if (subcategory) {
+            filterQuery["subcategory"] = req.query.subcategory
+        }
+
+        let allbooks = await bookModel.find(filterQuery)
+        console.log(allbooks)
+        if (allbooks.length == 0) return res.status(404).send({ status: false, message: "No book found" })
+
+        res.status(200).send({ status: true, message: "Book List", data: allbooks })
 
     } catch (err) {
         console.log(err.message)
@@ -223,10 +223,14 @@ const getBook = async function (req, res) {
 const updateBookById = async function (req, res) {
 
     try {
-
         const data = req.body
-
         let bookId = req.params.bookId
+        const { title, excerpt, ISBN } = data
+         
+        let updateQuery= {}
+         
+        if(title){
+            updateQuery["title"]= title;
 
         const { title, excerpt, releaseAt, ISBN } = data
 
@@ -248,27 +252,43 @@ const updateBookById = async function (req, res) {
             }
         }
 
-        if (ISBN) {
+        if(excerpt){
+            updateQuery["excerpt"]= excerpt
+        }
+        
+        if(req.body["release date"]){
+            updateQuery["releasedAt"]= req.body["release date"]
+        }
+
+        if(ISBN){
+            updateQuery["ISBN"]= ISBN;
+
             const checkISBN = await bookModel.findOne({ ISBN: ISBN })
             if (checkISBN) {
-                res.status(400).send({
+                res.status(400).send({                         
                     status: false,
-                    message: "book already present with this ISBN"
+                    message: "book already present with this ISBN"    
                 })
             }
         }
 
+        console.log(updateQuery)
 
-        const updateData = await bookModel.findOneAndUpdate(
-            { _id: bookId, isDeleted: false },
-            { $set: data },
-            { new: true })
-        console.log(updateData);
+        if (Object.keys(data).length==0) {
+            res.status(400).send({
+                status: false,
+                message: "All request body field can't be empty"
+            })
+        }
+
+        const updateData = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false },updateQuery,{ new: true })
+        
         res.status(200).send({ status: true, message: "success", data: updateData })
         return
 
 
-    } catch (err) {
+    
+}    catch (err) {
         console.log(err.message)
         return res.status(500).send({
             status: false,
