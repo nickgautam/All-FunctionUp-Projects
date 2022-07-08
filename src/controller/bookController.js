@@ -101,14 +101,15 @@ const createBook = async function (req, res) {
         let valid13ISBN =   /^[0-9X]{13}$/   //ISBN-13       9780123456472
         let valid10ISBN =   /^[0-9X]{10}$/     // ISBN-10     0123456479                                                                                     
         let valtesting =      /(?=(?:[0-9]+[-]){4})[-0-9]{17}$/   //ISBN-13       978-0-123456-47-2
-        let testing1 = /^[0-9X ]{17}$/          //ISBN-13       978 0 123456 47 2
-        let testing2 = /^[0-9X ]{13}$/     // ISBN-10     0 123456 47 9
+        let testing1 =      /(?=(?:[0-9]+[-]){3})[-0-9]{13}$/   //ISBN-10       0-123456-47-9
+        let testing2 = /^[0-9X ]{17}$/          //ISBN-13       978 0 123456 47 2
+        let testing3= /^[0-9X ]{13}$/     // ISBN-10     0 123456 47 9
       
 
-        if (!(valid13ISBN.test(ISBN) || valid10ISBN.test(ISBN) || valtesting.test(ISBN) || testing1.test(ISBN) || testing2.test(ISBN))) {
+        if (!(valid13ISBN.test(ISBN) || valid10ISBN.test(ISBN) || valtesting.test(ISBN) || testing1.test(ISBN) || testing2.test(ISBN) || testing3.test(ISBN))) {
             return res.status(400).send({
                 status: false,
-                message: "ISBN should be either 10 or 13 digits & format should look like:  978-0-123456-47-2"
+                message: "ISBN should be either 10 or 13 digits & format should look likes: 9780123456472 , 978-0-123456-47-2 , 978 0 123456 47 2 , 0123456479 , 0-123456-47-9 , 0 123456 47 9"
             })
         }
 
