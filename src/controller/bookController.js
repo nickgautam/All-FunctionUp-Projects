@@ -3,17 +3,10 @@ const bookModel = require("../model/bookModel")
 const valid = require('../validation/validation')
 const moment = require("moment")
 
-// const isValidBody = function (value) {
-//     if (Object.keys(value).length == 0) return false
-//     return true
-// }
-
-
 
 function isNum(val) {
     return !isNaN(val)
 }
-
 
 const isValidString = function (value) {
     if (typeof value === "undefined" || value === null) return false
@@ -128,19 +121,20 @@ const createBook = async function (req, res) {
                 message: "category is mandatory"
             })
         }
+
         if (!isValidString(category)) {
             return res.status(400).send({
                 status: false,
                 message: "category should be string & can't be empty"
             })
         }
+
         if (isNum(category) == true) {
             return res.status(400).send({
                 status: false,
                 message: "category can't be a number"
             })
         }
-
 
         if (!subcategory) {
             return res.status(400).send({
@@ -151,13 +145,7 @@ const createBook = async function (req, res) {
 
         if (subcategory !== undefined)
             req.body.subcategory = validateSubCategory(req.body.subcategory)
-        // if(subcategory.length==0){
-        //     return res.status(400).send({
-        //         status: false,
-        //         message: "subcategory should not be empty"
-        //     })
-        // }
-
+       
         data.releasedAt = moment().format("YYYY-MM-DD")
         let saveData = await bookModel.create(data)
 
@@ -178,9 +166,7 @@ const createBook = async function (req, res) {
 }
 
 
-
 //***************************************** getBook **********************************************************/
-
 
 const getBook = async function (req, res) {
     try {
@@ -189,18 +175,18 @@ const getBook = async function (req, res) {
 
         let filterQuery = { isDeleted: false }
         if (userId) {
-            filterQuery["userId"] = req.query.userId
+            filterQuery["userId"] = userId
         }
 
         if (category) {
-            filterQuery["category"] = req.query.category
+            filterQuery["category"] = category
         }
 
         if (subcategory) {
-            filterQuery["subcategory"] = req.query.subcategory
+            filterQuery["subcategory"] = subcategory
         }
 
-        let allbooks = await bookModel.find(filterQuery)
+        let allbooks = await bookModel.find(filterQuery).select({_id:1, title:1, excerpt:1, userId:1, category:1, releasedAt:1}).sort({title: 1})
         console.log(allbooks)
         if (allbooks.length == 0) return res.status(404).send({ status: false, message: "No book found" })
 
@@ -231,8 +217,8 @@ const getBookById = async function (req, res){
             })
         }
         return res.status(200).send({
-            status: true,
-            message : "Book List",
+            status: true,   
+            message : "Book List",    
             data: allBooks
         })
 
@@ -245,7 +231,6 @@ const getBookById = async function (req, res){
         })
     }
 }
-
 
 
 //***************************************** updateBookById **********************************************************/
@@ -300,7 +285,7 @@ const updateBookById = async function (req, res) {
         if (Object.keys(data).length == 0) {
             res.status(400).send({
                 status: false,
-                message: "All request body field can't be empty"
+                message: "request body can't be empty"
             })
         }
 
@@ -308,7 +293,7 @@ const updateBookById = async function (req, res) {
         if(!updateData){
             return res.status(404).send({
                 status: false,
-                message: "book is deleted now you can't update"
+                message: "book is deleted, you can't update"
             })
         }
 
@@ -325,14 +310,6 @@ const updateBookById = async function (req, res) {
     }
 }
     
-
-
-
-
-
-
-
-
 module.exports.createBook = createBook
 module.exports.getBook = getBook
 module.exports.getBookById = getBookById

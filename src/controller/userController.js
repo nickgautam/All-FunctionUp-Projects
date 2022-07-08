@@ -98,7 +98,7 @@ const createUser = async function (req, res) {
                 message: "email is mandatory"
             })
         }
-
+// ""
         if (!regexEmail.test(email)) { return res.status(400).send({ status: false, message: "email should look like this anything@anything.com, and should not any space" }) }
 
         if (!isValidString(email)) return res.status(400).send({ status: false, message: "email should be a string, shouldn't have whitespace" })
@@ -189,7 +189,7 @@ const userLogin = async function (req, res) {
         }
         const user = await userModel.findOne({ email: email, password: password })
         if (!user) {
-            return res.status(400).send({ status: false, message: "Make sure your login Credentials are correct or not " })
+            return res.status(401).send({ status: false, message: "Make sure your login Credentials are correct or not " })
             
         }
         const token = await jwt.sign({
@@ -199,7 +199,7 @@ const userLogin = async function (req, res) {
         }, "my@third@project@book@management")
 
         res.setHeader('x-api-key', token)
-        res.status(200).send({ status: true, message: 'user login successfull', token: token })
+        res.status(200).send({ status: true, message: 'user login successfully', data: token })
 
     } catch (error) {
         return res.status(500).send({ 
