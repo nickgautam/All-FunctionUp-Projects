@@ -3,17 +3,9 @@ const bookModel = require("../model/bookModel")
 const valid = require('../validation/validation')
 const moment = require("moment")
 
-// const isValidBody = function (value) {
-//     if (Object.keys(value).length == 0) return false
-//     return true
-// }
-
-
-
 function isNum(val) {
     return !isNaN(val)
 }
-
 
 const isValidString = function (value) {
     if (typeof value === "undefined" || value === null) return false
@@ -151,12 +143,12 @@ const createBook = async function (req, res) {
 
         if (subcategory !== undefined)
             req.body.subcategory = validateSubCategory(req.body.subcategory)
-        // if(subcategory.length==0){
-        //     return res.status(400).send({
-        //         status: false,
-        //         message: "subcategory should not be empty"
-        //     })
-        // }
+        if(subcategory.length==0){
+            return res.status(400).send({
+                status: false,
+                message: "subcategory should not be empty"
+            })
+        }
 
         data.releasedAt = moment().format("YYYY-MM-DD")
         let saveData = await bookModel.create(data)
@@ -176,7 +168,6 @@ const createBook = async function (req, res) {
     }
 
 }
-
 
 
 //***************************************** getBook **********************************************************/
@@ -325,13 +316,6 @@ const updateBookById = async function (req, res) {
     }
 }
     
-
-
-
-
-
-
-
 
 module.exports.createBook = createBook
 module.exports.getBook = getBook
