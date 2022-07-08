@@ -221,7 +221,7 @@ const getBookById = async function (req, res){
             message : "Book List",    
             data: allBooks
         })
-
+    
     }
     catch (err) {
         console.log(err.message)
@@ -293,14 +293,14 @@ const updateBookById = async function (req, res) {
         if(!updateData){
             return res.status(404).send({
                 status: false,
-                message: "book is deleted, you can't update"
+                message: "Either book is not exist with this bookId or book is deleted, so you can't update"
             })
         }
 
         res.status(200).send({ status: true, message: "success", data: updateData })
         return
 
-    }
+    }     
     catch (err) {
         console.log(err.message)
         return res.status(500).send({

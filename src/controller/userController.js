@@ -199,7 +199,7 @@ const userLogin = async function (req, res) {
         }, "my@third@project@book@management")
 
         res.setHeader('x-api-key', token)
-        res.status(200).send({ status: true, message: 'user login successfully', data: token })
+        res.status(201).send({ status: true, message: 'user login successfully', data: token })
 
     } catch (error) {
         return res.status(500).send({ 
