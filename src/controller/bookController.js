@@ -27,9 +27,11 @@ const validateSubCategory = (subcategory) => {
             return subcategory !== ""
         })
     }
-    return subcategory
+    return subcategory.join(",").replace("[", "").replace("]", "").replace("{", "").replace("}", "").trim().split(",").filter((subcategory) => {
+        return subcategory !== ""
+    })
 }
-
+     
 //---------------------- create book ------------------------
 
 const createBook = async function (req, res) {
@@ -96,21 +98,17 @@ const createBook = async function (req, res) {
                 message: "ISBN is mandatory"
             })
         }
-        let validISBN = /^[0-9]{3}\-[0-9]{1}\-[0-9]{6}\-[0-9]{2}\-[0-9]{1}$/
-        //let validISBN2 = /^[0-9]{1}\-[0-9]{6}\-[0-9]{2}\-[0-9]{1}$/
+        let valid13ISBN =   /^[0-9X]{13}$/   //ISBN-13       9780123456472
+        let valid10ISBN =   /^[0-9X]{10}$/     // ISBN-10     0123456479                                                                                     
+        let valtesting =      /(?=(?:[0-9]+[-]){4})[-0-9]{17}$/   //ISBN-13       978-0-123456-47-2
+        let testing1 = /^[0-9X ]{17}$/          //ISBN-13       978 0 123456 47 2
+        let testing2 = /^[0-9X ]{13}$/     // ISBN-10     0 123456 47 9
+      
 
-        // /^(?=.*[0-9])(?=.*[-])[0-9-]{1,13}$/
-        //  /^(?=.*[0-9]{13})(?=.*[-]{4})$/
-        // /^(?:[0-9]{9}X|[0-9]{10})$/;
-        // /^[0-9X]$/
-        // ^[\d*\-]{10}|[\d*\-]{13}$
-        // ISBN-10     0-123456-47-9
-        //ISBN-13       978-0-123456-47-2
-
-        if (!validISBN.test(ISBN)) {
+        if (!(valid13ISBN.test(ISBN) || valid10ISBN.test(ISBN) || valtesting.test(ISBN) || testing1.test(ISBN) || testing2.test(ISBN))) {
             return res.status(400).send({
                 status: false,
-                message: "ISBN should be 13 digits & format should look like:  978-0-123456-47-2"
+                message: "ISBN should be either 10 or 13 digits & format should look like:  978-0-123456-47-2"
             })
         }
 
@@ -247,6 +245,10 @@ const updateBookById = async function (req, res) {
         
         if(req.body["release date"]){
             updateQuery["releasedAt"]= req.body["release date"]
+        }
+
+        if(req.body["releasedAt"]){
+            updateQuery["releasedAt"]= req.body["releasedAt"]
         }
 
         if(ISBN){
