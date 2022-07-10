@@ -9,7 +9,7 @@ function isNum(val) {
 
 const isValidString = function (value) {
     if (typeof value === "undefined" || value === null) return false
-    if (typeof value !== "string" || value.trim().length === 0) return false //""
+    if (typeof value !== "string" || value.trim().length === 0) return false //"hffdhdfghdf"
     return true;
 }
 
@@ -154,14 +154,8 @@ const createBook = async function (req, res) {
                     message: "releasedAt is mandatory"
                 })
             }
-            if (!isValidString(releasedAt)) {
-                return res.status(400).send({
-                    status: false,
-                    message: "releasedAt should be a date like '2022-07-14' & can't be empty"
-                })
-            }
-       // A problem we have to handle how we can check the type is date or not.
-        // data.releasedAt = moment().format("YYYY-MM-DD")
+
+        data.releasedAt = moment().format("YYYY-MM-DD")
         let saveData = await bookModel.create(data)
 
         return res.status(201).send({
@@ -189,10 +183,9 @@ const getBook = async function (req, res) {
         const { userId, category, subcategory } = data;
 
         let filterQuery = { isDeleted: false }
-
+   
        
         if (userId) {
-        //  if(!isValidString(userId)) return res.status(400).send({status: false, message: "userId can't be empty"})
             let regex = /^[0-9a-f]{24}$/;    
             if (!regex.test(userId)) 
                return res.status(400).send({ status: false, message: `userId is not valid` });
@@ -201,7 +194,6 @@ const getBook = async function (req, res) {
         }
 
         if (category) {
-            // if(!isValidString(category)) return res.status(400).send({status: false, message: "category can't be empty"})
             filterQuery["category"] = category
         }
 
