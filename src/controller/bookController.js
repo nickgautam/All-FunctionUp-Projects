@@ -150,7 +150,7 @@ const createBook = async function (req, res) {
             })
         }
 
-        data.releasedAt = moment().format("YYYY-MM-DD")
+        // data.releasedAt = moment().format("YYYY-MM-DD")
         let saveData = await bookModel.create(data)
 
         return res.status(201).send({
