@@ -9,7 +9,7 @@ function isNum(val) {
 
 const isValidString = function (value) {
     if (typeof value === "undefined" || value === null) return false
-    if (typeof value !== "string" || value.trim().length === 0) return false //"hffdhdfghdf"
+    if (typeof value !== "string" || value.trim().length === 0) return false 
     return true;
 }
 
@@ -104,7 +104,6 @@ const createBook = async function (req, res) {
                 message: "ISBN should be either 10 or 13 digits & format should look likes: 9780123456472 , 978-0-123456-47-2 , 978 0 123456 47 2 , 0123456479 , 0-123456-47-9 , 0 123456 47 9"
             })
         }
-
 
         let checkISBN = await bookModel.findOne({ ISBN: ISBN })
         if (checkISBN) {
