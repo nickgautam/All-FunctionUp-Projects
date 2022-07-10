@@ -29,7 +29,7 @@ const validateSubCategory = (subcategory) => {
 const createBook = async function (req, res) {
     try {
         let data = req.body      
-        let { title, excerpt, userId, ISBN, category, subcategory } = data       
+        let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data       
 
         if (Object.keys(data).length == 0) {
             return res.status(400).send({
@@ -60,7 +60,7 @@ const createBook = async function (req, res) {
 
         if (!excerpt) {
             return res.status(400).send({
-                status: false.valueOf,
+                status: false,
                 message: "excerpt is mandatory"
             })
         }
@@ -120,19 +120,20 @@ const createBook = async function (req, res) {
                 message: "category is mandatory"
             })
         }
+
         if (!isValidString(category)) {
             return res.status(400).send({
                 status: false,
                 message: "category should be string & can't be empty"
             })
         }
+
         if (isNum(category) == true) {
             return res.status(400).send({
                 status: false,
                 message: "category can't be a number"
             })
         }
-
 
         if (!subcategory) {
             return res.status(400).send({
@@ -143,13 +144,23 @@ const createBook = async function (req, res) {
 
         if (subcategory !== undefined)
             req.body.subcategory = validateSubCategory(req.body.subcategory)
-        if(subcategory.length==0){
-            return res.status(400).send({
-                status: false,
-                message: "subcategory should not be empty"
-            })
-        }
 
+            if (releasedAt) {
+                
+            }
+            if (!releasedAt) {
+                return res.status(400).send({
+                    status: false,
+                    message: "releasedAt is mandatory"
+                })
+            }
+            if (!isValidString(releasedAt)) {
+                return res.status(400).send({
+                    status: false,
+                    message: "releasedAt should be a date like '2022-07-14' & can't be empty"
+                })
+            }
+       // A problem we have to handle how we can check the type is date or not.
         // data.releasedAt = moment().format("YYYY-MM-DD")
         let saveData = await bookModel.create(data)
 
@@ -172,26 +183,34 @@ const createBook = async function (req, res) {
 
 //***************************************** getBook **********************************************************/
 
-
 const getBook = async function (req, res) {
     try {
         let data = req.query;
         const { userId, category, subcategory } = data;
 
         let filterQuery = { isDeleted: false }
+
+       
         if (userId) {
-            filterQuery["userId"] = req.query.userId
+        //  if(!isValidString(userId)) return res.status(400).send({status: false, message: "userId can't be empty"})
+            let regex = /^[0-9a-f]{24}$/;    
+            if (!regex.test(userId)) 
+               return res.status(400).send({ status: false, message: `userId is not valid` });
+
+            filterQuery["userId"] = userId
         }
 
         if (category) {
-            filterQuery["category"] = req.query.category
+            // if(!isValidString(category)) return res.status(400).send({status: false, message: "category can't be empty"})
+            filterQuery["category"] = category
         }
 
         if (subcategory) {
-            filterQuery["subcategory"] = req.query.subcategory
+            filterQuery["subcategory"] = subcategory
         }
 
-        let allbooks = await bookModel.find(filterQuery)
+       
+        let allbooks = await bookModel.find(filterQuery).select({_id:1, title:1, excerpt:1, userId:1, category:1, releasedAt:1}).sort({title: 1})  //<---------<
         console.log(allbooks)
         if (allbooks.length == 0) return res.status(404).send({ status: false, message: "No book found" })
 
@@ -213,20 +232,22 @@ const getBook = async function (req, res) {
 const getBookById = async function (req, res){
     try{
         let bookId = req.params.bookId
-
+        let regex = /^[0-9a-f]{24}$/;    
+        if (!regex.test(bookId)) 
+           return res.status(400).send({ status: false, message: `bookId is not valid` });
         let allBooks = await bookModel.findById(bookId)
         if(!allBooks){
             return res.status(404).send({
                 status: false,
-                message: "no books found"
+                message: "No book found"
             })
         }
         return res.status(200).send({
-            status: true,
-            message : "Book List",
+            status: true,   
+            message : "Book List",    
             data: allBooks
         })
-
+    
     }
     catch (err) {
         console.log(err.message)
@@ -236,7 +257,6 @@ const getBookById = async function (req, res){
         })
     }
 }
-
 
 
 //***************************************** updateBookById **********************************************************/
@@ -291,7 +311,7 @@ const updateBookById = async function (req, res) {
         if (Object.keys(data).length == 0) {
             res.status(400).send({
                 status: false,
-                message: "All request body field can't be empty"
+                message: "request body can't be empty"
             })
         }
 
@@ -299,14 +319,14 @@ const updateBookById = async function (req, res) {
         if(!updateData){
             return res.status(404).send({
                 status: false,
-                message: "book is deleted now you can't update"
+                message: "Either book is not exist with this bookId or book is deleted, so you can't update"
             })
         }
 
         res.status(200).send({ status: true, message: "success", data: updateData })
         return
 
-    }
+    }     
     catch (err) {
         console.log(err.message)
         return res.status(500).send({
@@ -316,7 +336,6 @@ const updateBookById = async function (req, res) {
     }
 }
     
-
 module.exports.createBook = createBook
 module.exports.getBook = getBook
 module.exports.getBookById = getBookById

@@ -44,7 +44,7 @@ const authorisationCreateBook = async function (req, res, next) {
            return res.status(400).send({ status: false, message: `userId is not valid` });   
            
         if (decodedToken.userId !== userId)
-            return res.status(400).send({ status: false, message: "User logged is not allowed to create the book"});
+            return res.status(403).send({ status: false, message: "User logged is not allowed to create the book"});
           
         }catch (err) {res.status(500).send({status:false, message: err.message })}
         next();
@@ -65,7 +65,7 @@ const authorisationByParams = async function (req, res, next) {
         let decodedToken = jwt.verify(token, "my@third@project@book@management");
         console.log(decodedToken)
         let bookId= req.params.bookId;
-        let regex = /^[0-9a-f]{24}$/;
+        let regex = /^[0-9a-f]{24}$/;    
         if (!regex.test(bookId)) 
            return res.status(400).send({ status: false, message: `bookId is not valid` });
            
@@ -77,7 +77,7 @@ const authorisationByParams = async function (req, res, next) {
         console.log(newUserId)
 
         if (decodedToken.userId !== newUserId.toString())
-            return res.status(400).send({ status: false, message: "User logged is not allowed to modified other's data"});
+            return res.status(403).send({ status: false, message: "User logged is not allowed to modified other's data"});
           
         }catch (err) {res.status(500).send({status:false, message: err.message })}
         next();
