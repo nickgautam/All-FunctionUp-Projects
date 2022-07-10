@@ -3,7 +3,6 @@ const bookModel = require("../model/bookModel")
 const valid = require('../validation/validation')
 const moment = require("moment")
 
-
 function isNum(val) {
     return !isNaN(val)
 }
@@ -30,7 +29,7 @@ const validateSubCategory = (subcategory) => {
 const createBook = async function (req, res) {
     try {
         let data = req.body      
-        let { title, excerpt, userId, ISBN, category, subcategory } = data       
+        let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data       
 
         if (Object.keys(data).length == 0) {
             return res.status(400).send({
@@ -61,7 +60,7 @@ const createBook = async function (req, res) {
 
         if (!excerpt) {
             return res.status(400).send({
-                status: false.valueOf,
+                status: false,
                 message: "excerpt is mandatory"
             })
         }
@@ -145,8 +144,21 @@ const createBook = async function (req, res) {
 
         if (subcategory !== undefined)
             req.body.subcategory = validateSubCategory(req.body.subcategory)
-       
-        data.releasedAt = moment().format("YYYY-MM-DD")
+
+            if (!releasedAt) {
+                return res.status(400).send({
+                    status: false,
+                    message: "releasedAt is mandatory"
+                })
+            }
+            if (!isValidString(releasedAt)) {
+                return res.status(400).send({
+                    status: false,
+                    message: "releasedAt should be a date like '2022-07-14' & can't be empty"
+                })
+            }
+       // A problem we have to handle how we can check the type is date or not.
+        // data.releasedAt = moment().format("YYYY-MM-DD")
         let saveData = await bookModel.create(data)
 
         return res.status(201).send({
@@ -174,11 +186,19 @@ const getBook = async function (req, res) {
         const { userId, category, subcategory } = data;
 
         let filterQuery = { isDeleted: false }
+
+       
         if (userId) {
+        //  if(!isValidString(userId)) return res.status(400).send({status: false, message: "userId can't be empty"})
+            let regex = /^[0-9a-f]{24}$/;    
+            if (!regex.test(userId)) 
+               return res.status(400).send({ status: false, message: `userId is not valid` });
+
             filterQuery["userId"] = userId
         }
 
         if (category) {
+            // if(!isValidString(category)) return res.status(400).send({status: false, message: "category can't be empty"})
             filterQuery["category"] = category
         }
 
@@ -186,7 +206,8 @@ const getBook = async function (req, res) {
             filterQuery["subcategory"] = subcategory
         }
 
-        let allbooks = await bookModel.find(filterQuery).select({_id:1, title:1, excerpt:1, userId:1, category:1, releasedAt:1}).sort({title: 1})
+       
+        let allbooks = await bookModel.find(filterQuery).select({_id:1, title:1, excerpt:1, userId:1, category:1, releasedAt:1}).sort({title: 1})  //<---------<
         console.log(allbooks)
         if (allbooks.length == 0) return res.status(404).send({ status: false, message: "No book found" })
 
@@ -208,12 +229,14 @@ const getBook = async function (req, res) {
 const getBookById = async function (req, res){
     try{
         let bookId = req.params.bookId
-
+        let regex = /^[0-9a-f]{24}$/;    
+        if (!regex.test(bookId)) 
+           return res.status(400).send({ status: false, message: `bookId is not valid` });
         let allBooks = await bookModel.findById(bookId)
         if(!allBooks){
             return res.status(404).send({
                 status: false,
-                message: "no books found"
+                message: "No book found"
             })
         }
         return res.status(200).send({

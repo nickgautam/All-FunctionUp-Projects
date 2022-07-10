@@ -44,7 +44,7 @@ const authorisationCreateBook = async function (req, res, next) {
            return res.status(400).send({ status: false, message: `userId is not valid` });   
            
         if (decodedToken.userId !== userId)
-            return res.status(400).send({ status: false, message: "User logged is not allowed to create the book"});
+            return res.status(403).send({ status: false, message: "User logged is not allowed to create the book"});
           
         }catch (err) {res.status(500).send({status:false, message: err.message })}
         next();
