@@ -107,7 +107,6 @@ const createBook = async function (req, res) {
             })
         }
 
-
         let checkISBN = await bookModel.findOne({ ISBN: ISBN })
         if (checkISBN) {
             return res.status(400).send({
@@ -147,6 +146,9 @@ const createBook = async function (req, res) {
         if (subcategory !== undefined)
             req.body.subcategory = validateSubCategory(req.body.subcategory)
 
+            if (releasedAt) {
+                
+            }
             if (!releasedAt) {
                 return res.status(400).send({
                     status: false,

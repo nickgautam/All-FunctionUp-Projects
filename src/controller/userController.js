@@ -7,7 +7,7 @@ function isNum(val) {
 }
 const isValidString = function (value) {
     if (typeof value === "undefined" || value === null) return false
-    if (typeof value !== "string" || value.trim().length === 0) return false //"   "
+    if (typeof value !== "string" || value.trim().length === 0) return false
     return true;
 }
 
@@ -167,10 +167,14 @@ const createUser = async function (req, res) {
 
 const userLogin = async function (req, res) {
 
-    const loginData = req.body
-    const { email, password } = loginData
+  
 
     try {
+
+        const loginData = req.body
+        const { email, password } = loginData
+
+        
         if (Object.keys(loginData).length == 0) {
             res.status(400).send({ status: false, message: "login credentials must be presents & only email and password should be inside body" })
             return
@@ -208,7 +212,6 @@ const userLogin = async function (req, res) {
         })
     }
 }
-
 
 
 module.exports.userLogin = userLogin

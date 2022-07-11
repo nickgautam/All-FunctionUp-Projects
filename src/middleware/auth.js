@@ -6,10 +6,10 @@ const bookModel = require('../model/bookModel');
 const authentication = async function (req, res, next) {
 
     try {
-        let token = req.headers["x-api-key"];         
-        if (!token) {    
+        let token = req.headers["x-api-key"];
+        if (!token) {
 
-            token = req.headers["X-Api-Key"];     
+            token = req.headers["X-Api-Key"];
         }
         if (!token) return res.status(400).send({ status: false, message: "token must be present" });
 
@@ -19,7 +19,7 @@ const authentication = async function (req, res, next) {
     
     } catch (error) {return res.status(500).send({ status: false, message: error.message })};
 
-    next();      
+    next();
 
 }
 
@@ -38,11 +38,11 @@ const authorisationCreateBook = async function (req, res, next) {
         }
         let decodedToken = jwt.verify(token, "my@third@project@book@management");
         console.log(decodedToken)
-        let userId= req.body.userId;
+        let userId = req.body.userId;
         let regex = /^[0-9a-f]{24}$/;
-        if (!regex.test(userId)) 
-           return res.status(400).send({ status: false, message: `userId is not valid` });   
-           
+        if (!regex.test(userId))
+            return res.status(400).send({ status: false, message: `userId is not valid` });
+
         if (decodedToken.userId !== userId)
             return res.status(403).send({ status: false, message: "User logged is not allowed to create the book"});
           
