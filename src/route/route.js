@@ -1,6 +1,7 @@
 const express = require('express')
 const userController = require('../controller/userController')
 const bookController = require('../controller/bookController')
+const reviewController = require('../controller/reviewController')
 const router = express.Router()
 const auth= require("../middleware/auth")
 
@@ -20,10 +21,10 @@ router.put('/books/:bookId', auth.authentication, auth.authorisationByParams, bo
 // router.delete('/books/:bookId', bookController.deleteBookById)
 
 
-// router.post('/books/:bookId/review', bookController.createReview)
+router.post('/books/:bookId/review', reviewController.createReview)
 
 
-// router.put('/books/:bookId/review/:reviewId', bookController.updateReviewById)
+router.put('/books/:bookId/review/:reviewId', reviewController.updateReviewById)
 
 
 // router.delete('/books/:bookId/review/:reviewId', bookController.deleteReviewById)

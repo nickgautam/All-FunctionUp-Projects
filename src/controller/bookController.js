@@ -25,13 +25,13 @@ const validateSubCategory = (subcategory) => {
         return subcategory !== ""
     })
 }
-     
+
 //---------------------- create book ------------------------
 
 const createBook = async function (req, res) {
     try {
-        let data = req.body      
-        let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data       
+        let data = req.body
+        let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data
 
         if (Object.keys(data).length == 0) {
             return res.status(400).send({
@@ -92,13 +92,13 @@ const createBook = async function (req, res) {
                 message: "ISBN is mandatory"
             })
         }
-        let valid13ISBN =   /^[0-9X]{13}$/   //ISBN-13       9780123456472
-        let valid10ISBN =   /^[0-9X]{10}$/     // ISBN-10     0123456479                                                                                     
-        let valtesting =      /(?=(?:[0-9]+[-]){4})[-0-9]{17}$/   //ISBN-13       978-0-123456-47-2
-        let testing1 =      /(?=(?:[0-9]+[-]){3})[-0-9]{13}$/   //ISBN-10       0-123456-47-9
+        let valid13ISBN = /^[0-9X]{13}$/   //ISBN-13       9780123456472
+        let valid10ISBN = /^[0-9X]{10}$/     // ISBN-10     0123456479                                                                                     
+        let valtesting = /(?=(?:[0-9]+[-]){4})[-0-9]{17}$/   //ISBN-13       978-0-123456-47-2
+        let testing1 = /(?=(?:[0-9]+[-]){3})[-0-9]{13}$/   //ISBN-10       0-123456-47-9
         let testing2 = /^[0-9X ]{17}$/          //ISBN-13       978 0 123456 47 2
-        let testing3= /^[0-9X ]{13}$/     // ISBN-10     0 123456 47 9
-      
+        let testing3 = /^[0-9X ]{13}$/     // ISBN-10     0 123456 47 9
+
 
         if (!(valid13ISBN.test(ISBN) || valid10ISBN.test(ISBN) || valtesting.test(ISBN) || testing1.test(ISBN) || testing2.test(ISBN) || testing3.test(ISBN))) {
             return res.status(400).send({
@@ -146,22 +146,22 @@ const createBook = async function (req, res) {
         if (subcategory !== undefined)
             req.body.subcategory = validateSubCategory(req.body.subcategory)
 
-            if (!releasedAt) {
-                return res.status(400).send({
-                    status: false,
-                    message: "releasedAt is mandatory"
-                })
-            }
-            
-            if(!/^\d{4}-\d{2}-\d{2}$/.test(releasedAt)) {
-                return res.status(400).send({
-                    status: false,
-                    message: " releasedAt should be look like this: YYYY-MM-DD "
-                })
-            }  
-       
+        if (!releasedAt) {
+            return res.status(400).send({
+                status: false,
+                message: "releasedAt is mandatory"
+            })
+        }
 
-         let saveData = await bookModel.create(data)
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(releasedAt)) {
+            return res.status(400).send({
+                status: false,
+                message: " releasedAt should be look like this: YYYY-MM-DD "
+            })
+        }
+
+
+        let saveData = await bookModel.create(data)
 
         return res.status(201).send({
             status: true,
@@ -188,12 +188,12 @@ const getBook = async function (req, res) {
         const { userId, category, subcategory } = data;
 
         let filterQuery = { isDeleted: false }
-   
-       
+
+
         if (userId) {
-            let regex = /^[0-9a-f]{24}$/;    
-            if (!regex.test(userId)) 
-               return res.status(400).send({ status: false, message: `userId is not valid` });
+            let regex = /^[0-9a-f]{24}$/;
+            if (!regex.test(userId))
+                return res.status(400).send({ status: false, message: `userId is not valid` });
 
             filterQuery["userId"] = userId
         }
@@ -206,13 +206,13 @@ const getBook = async function (req, res) {
             filterQuery["subcategory"] = subcategory
         }
 
-       
-        let allbooks = await bookModel.find(filterQuery).select({_id:1, title:1, excerpt:1, userId:1, category:1, releasedAt:1}).sort({title: 1})  //<---------<
+
+        let allbooks = await bookModel.find(filterQuery).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1 }).sort({ title: 1 })  //<---------<
         console.log(allbooks)
         if (allbooks.length == 0) return res.status(404).send({ status: false, message: "No book found" })
 
         res.status(200).send({ status: true, message: "Book List", data: allbooks })
-    
+
     } catch (err) {
         console.log(err.message)
         return res.status(500).send({
@@ -226,25 +226,25 @@ const getBook = async function (req, res) {
 //***************************************** getBookById **********************************************************/
 
 
-const getBookById = async function (req, res){
-    try{
+const getBookById = async function (req, res) {
+    try {
         let bookId = req.params.bookId
-        let regex = /^[0-9a-f]{24}$/;    
-        if (!regex.test(bookId)) 
-           return res.status(400).send({ status: false, message: `bookId is not valid` });
+        let regex = /^[0-9a-f]{24}$/;
+        if (!regex.test(bookId))
+            return res.status(400).send({ status: false, message: `bookId is not valid` });
         let allBooks = await bookModel.findById(bookId)
-        if(!allBooks){
+        if (!allBooks) {
             return res.status(404).send({
                 status: false,
                 message: "No book found"
             })
         }
         return res.status(200).send({
-            status: true,   
-            message : "Book List",    
+            status: true,
+            message: "Book List",
             data: allBooks
         })
-    
+
     }
     catch (err) {
         console.log(err.message)
@@ -264,11 +264,11 @@ const updateBookById = async function (req, res) {
         const data = req.body
         let bookId = req.params.bookId
         const { title, excerpt, ISBN } = data
-         
-        let updateQuery= {}
-         
-        if(title){
-            updateQuery["title"]= title;
+
+        let updateQuery = {}
+
+        if (title) {
+            updateQuery["title"] = title;
 
             const checkTitle = await bookModel.findOne({ title: title })
             if (checkTitle) {
@@ -279,26 +279,26 @@ const updateBookById = async function (req, res) {
             }
         }
 
-        if(excerpt){
-            updateQuery["excerpt"]= excerpt
-        }
-        
-        if(req.body["release date"]){
-            updateQuery["releasedAt"]= req.body["release date"]
+        if (excerpt) {
+            updateQuery["excerpt"] = excerpt
         }
 
-        if(req.body["releasedAt"]){
-            updateQuery["releasedAt"]= req.body["releasedAt"]
+        if (req.body["release date"]) {
+            updateQuery["releasedAt"] = req.body["release date"]
         }
 
-        if(ISBN){
-            updateQuery["ISBN"]= ISBN;
+        if (req.body["releasedAt"]) {
+            updateQuery["releasedAt"] = req.body["releasedAt"]
+        }
+
+        if (ISBN) {
+            updateQuery["ISBN"] = ISBN;
 
             const checkISBN = await bookModel.findOne({ ISBN: ISBN })
             if (checkISBN) {
-                res.status(400).send({                         
+                res.status(400).send({
                     status: false,
-                    message: "book already present with this ISBN"    
+                    message: "book already present with this ISBN"
                 })
             }
         }
@@ -313,7 +313,7 @@ const updateBookById = async function (req, res) {
         }
 
         const updateData = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, updateQuery, { new: true })
-        if(!updateData){
+        if (!updateData) {
             return res.status(404).send({
                 status: false,
                 message: "Either book is not exist with this bookId or book is deleted, so you can't update"
@@ -323,7 +323,7 @@ const updateBookById = async function (req, res) {
         res.status(200).send({ status: true, message: "success", data: updateData })
         return
 
-    }     
+    }
     catch (err) {
         console.log(err.message)
         return res.status(500).send({
@@ -332,7 +332,7 @@ const updateBookById = async function (req, res) {
         })
     }
 }
-    
+
 module.exports.createBook = createBook
 module.exports.getBook = getBook
 module.exports.getBookById = getBookById

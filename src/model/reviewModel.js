@@ -17,7 +17,7 @@ const reviewSchema = new mongoose.Schema({
 
     reviewedAt : {
         type : Date,
-        default : new Date()
+        required: true
     },
 
     rating : {
@@ -38,4 +38,4 @@ const reviewSchema = new mongoose.Schema({
 })
 
 
-modeule.export = mongoose.Model("Review", reviewSchema)
+module.exports = mongoose.model("Review", reviewSchema)
