@@ -13,13 +13,17 @@ const authentication = async function (req, res, next) {
         }
         if (!token) return res.status(400).send({ status: false, message: "token must be present" });
 
-      jwt.verify(token, "my@third@project@book@management", function(error){
-   if(error) return res.status(401).send({status: false, message: "Token is invalid"})
-        });     
-    
-    } catch (error) {return res.status(500).send({ status: false, message: error.message })};
+        jwt.verify(token, "my@third@project@book@management", function (error) {
+            if (error)  return res.status(401).send({ status: false, message: "Token is invalid" }) 
+            next();
+        }
+        );
+       
 
-    next();
+
+    } catch (error) { return res.status(500).send({ status: false, message: error.message }) };
+
+
 
 }
 
@@ -44,10 +48,10 @@ const authorisationCreateBook = async function (req, res, next) {
             return res.status(400).send({ status: false, message: `userId is not valid` });
 
         if (decodedToken.userId !== userId)
-            return res.status(403).send({ status: false, message: "User logged is not allowed to create the book"});
-          
-        }catch (err) {res.status(500).send({status:false, message: err.message })}
-        next();
+            return res.status(403).send({ status: false, message: "User logged is not allowed to create the book" });
+
+    } catch (err) { res.status(500).send({ status: false, message: err.message }) }
+    next();
 }
 module.exports.authorisationCreateBook = authorisationCreateBook;
 
@@ -64,22 +68,22 @@ const authorisationByParams = async function (req, res, next) {
         }
         let decodedToken = jwt.verify(token, "my@third@project@book@management");
         console.log(decodedToken)
-        let bookId= req.params.bookId;
-        let regex = /^[0-9a-f]{24}$/;    
-        if (!regex.test(bookId)) 
-           return res.status(400).send({ status: false, message: `bookId is not valid` });
-           
-        let particularBook= await bookModel.findById(bookId).select({userId:1, _id:0});
-       
-        if(!particularBook) return res.status(404).send({status:false, message: "book doesn't exist with this bookId"})
+        let bookId = req.params.bookId;
+        let regex = /^[0-9a-f]{24}$/;
+        if (!regex.test(bookId))
+            return res.status(400).send({ status: false, message: `bookId is not valid` });
+
+        let particularBook = await bookModel.findById(bookId).select({ userId: 1, _id: 0 });
+
+        if (!particularBook) return res.status(404).send({ status: false, message: "book doesn't exist with this bookId" })
 
         let newUserId = particularBook.userId;
         console.log(newUserId)
 
         if (decodedToken.userId !== newUserId.toString())
-            return res.status(403).send({ status: false, message: "User logged is not allowed to modified other's data"});
-          
-        }catch (err) {res.status(500).send({status:false, message: err.message })}
-        next();
+            return res.status(403).send({ status: false, message: "User logged is not allowed to modified other's data" });
+
+    } catch (err) { res.status(500).send({ status: false, message: err.message }) }
+    next();
 }
 module.exports.authorisationByParams = authorisationByParams;   

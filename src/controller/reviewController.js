@@ -2,6 +2,7 @@ const bookModel = require('../model/bookModel')
 const reviewModel = require('../model/reviewModel')
 const moment = require('moment')
 const { findById } = require('../model/userModel')
+const validator = require('../validation/validation')
 
 
 // function isNum(val) {     //5
@@ -158,17 +159,28 @@ const createReview = async function (req, res) {
 const updateReviewById = async function (req, res) {
     try {
         const bookId = req.params.bookId
+        const reviewId = req.params.reviewId
+
         const reviewData = req.body
         const { reviewedBy, rating, review, } = reviewData
 
         reviewData["bookId"] = bookId
 
-        if (!/^[0-9a-f]{24}$/.test(bookId)) {
+        // if (!/^[0-9a-f]{24}$/.test(bookId)) {
+        //     return res.status(400).send({
+        //         status: false,
+        //         message: `bookId is not valid`
+        //     });
+        // }
+
+        if(!validator.isValidObjectId(bookId)){
             return res.status(400).send({
-                status: false,
-                message: `bookId is not valid`
-            });
+                        status: false,
+                        message: `bookId is not valid by mongoose`
+                    });
         }
+
+        //f11 *****************
 
         const checkBookId = await bookModel.findById(bookId)
         if (!checkBookId) {
@@ -177,6 +189,22 @@ const updateReviewById = async function (req, res) {
                 message: `No Book Found`
             });
         }
+
+        if (!/^[0-9a-f]{24}$/.test(reviewId)) {
+            return res.status(400).send({
+                status: false,
+                message: `reviewId is not valid`
+            });
+        }
+
+        const checkReviewId = await reviewModel.findById(reviewId)
+        if (!checkReviewId) {
+            return res.status(404).send({
+                status: false,
+                message: `No Review Found`
+            });
+        }
+
 
 
         if (Object.keys(reviewData).length == 0) {
@@ -257,8 +285,9 @@ const updateReviewById = async function (req, res) {
             updateQuery["review"] = review
         }
 
+        updateQuery["reviewedAt"] = moment().format("YYYY-MM-DDThh:mm:ss.SSS[Z]")
 
-        const newReview = await reviewModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { updateQuery, reviewedAt: moment().format("YYYY-MM-DDThh:mm:ss.SSS[Z]") })
+        const newReview = await reviewModel.findOneAndUpdate({ _id: reviewId, isDeleted: false },  updateQuery ,{new:true})
 
 
         res.status(200).send({
