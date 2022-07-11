@@ -12,22 +12,24 @@ const reviewSchema = new mongoose.Schema({
     reviewedBy : {
         type: String,
         required : true,
-        value : "reviewer's name",
         trim : true
     },
 
     reviewedAt : {
         type : Date,
         required : true,
+        trim : true
     },
 
     rating : {
         type : Number,
         required : true,
+        trim : true
     },
 
     review : {
         type : String,
+        trim : true
     },
 
     isDeleted : {
