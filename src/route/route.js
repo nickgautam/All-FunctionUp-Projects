@@ -13,7 +13,7 @@ router.post('/books', auth.authentication, auth.authorisationCreateBook, bookCon
 
 router.get('/books', auth.authentication, bookController.getBook)
 
-router.get('/books/:bookId',auth.authentication, auth.authorisationByParams, bookController.getBookById)
+router.get('/books/:bookId',auth.authentication,  bookController.getBookById)
 
 router.put('/books/:bookId', auth.authentication, auth.authorisationByParams, bookController.updateBookById)
 

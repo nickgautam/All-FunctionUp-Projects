@@ -2,7 +2,6 @@ const userModel = require('../model/userModel')
 const vd = require('../validation/validation')
 const jwt = require("jsonwebtoken");
 
-
 function isNum(val) {
     return !isNaN(val)
 }
@@ -168,10 +167,14 @@ const createUser = async function (req, res) {
 
 const userLogin = async function (req, res) {
 
-    const loginData = req.body
-    const { email, password } = loginData
+  
 
     try {
+
+        const loginData = req.body
+        const { email, password } = loginData
+
+        
         if (Object.keys(loginData).length == 0) {
             res.status(400).send({ status: false, message: "login credentials must be presents & only email and password should be inside body" })
             return
@@ -190,7 +193,7 @@ const userLogin = async function (req, res) {
         }
         const user = await userModel.findOne({ email: email, password: password })
         if (!user) {
-            return res.status(400).send({ status: false, message: "Make sure your login Credentials are correct or not " })
+            return res.status(401).send({ status: false, message: "Make sure your login Credentials are correct or not " })
             
         }
         const token = await jwt.sign({
