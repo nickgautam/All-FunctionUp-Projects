@@ -3,13 +3,15 @@ const bookModel = require("../model/bookModel")
 const valid = require('../validation/validation')
 const moment = require("moment")
 
+
+
 function isNum(val) {
     return !isNaN(val)
 }
 
 const isValidString = function (value) {
     if (typeof value === "undefined" || value === null) return false
-    if (typeof value !== "string" || value.trim().length === 0) return false //"hffdhdfghdf"
+    if (typeof value !== "string" || value.trim().length === 0) return false //"gdfgyfdghf"
     return true;
 }
 
@@ -151,9 +153,16 @@ const createBook = async function (req, res) {
                     message: "releasedAt is mandatory"
                 })
             }
+            
+            if(!/^\d{4}-\d{2}-\d{2}$/.test(releasedAt)) {
+                return res.status(400).send({
+                    status: false,
+                    message: " releasedAt should be look like this: YYYY-MM-DD "
+                })
+            }  
+       
 
-        data.releasedAt = moment().format("YYYY-MM-DD")
-        let saveData = await bookModel.create(data)
+         let saveData = await bookModel.create(data)
 
         return res.status(201).send({
             status: true,
