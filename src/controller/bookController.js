@@ -1,4 +1,4 @@
-const { default: mongoose } = require("mongoose")
+const { default: mongoose, trusted } = require("mongoose")
 const bookModel = require("../model/bookModel")
 const valid = require('../validation/validation')
 const moment = require("moment")
@@ -332,8 +332,32 @@ const updateBookById = async function (req, res) {
         })
     }
 }
-    
+  
+
+//***************************************** deleteBookById **********************************************************/
+
+const deleteBookById= async function(req, res){
+ 
+  try { 
+    let bookId= req.params.bookId
+
+    let saveData= await bookModel.findOne({_id:bookId, isDeleted: false})
+
+    if(!saveData) return res.status(400).send({status:false, message: "You can't delete again, Book is already deleted"})
+
+    let bookForDelete= await bookModel.findOneAndUpdate({_id:bookId}, {$set:{isDeleted:true}}, {new:true})
+
+    res.status(200).send({status:true, message: "Successfully delete", data: bookForDelete})
+    return
+
+} catch(err){return res.status(500).send({status: false, message: err.message})}
+
+}
+
+
+
 module.exports.createBook = createBook
 module.exports.getBook = getBook
 module.exports.getBookById = getBookById
 module.exports.updateBookById = updateBookById
+module.exports.deleteBookById = deleteBookById

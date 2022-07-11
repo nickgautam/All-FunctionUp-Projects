@@ -12,12 +12,13 @@ const reviewSchema = new mongoose.Schema({
     reviewedBy : {
         type: String,
         default : "Guest",
+        required: true,
         trim : true,
     },
 
     reviewedAt : {
         type : Date,
-        default : new Date()
+        required: true  
     },
 
     rating : {
@@ -38,4 +39,4 @@ const reviewSchema = new mongoose.Schema({
 })
 
 
-modeule.export = mongoose.Model("Review", reviewSchema)
+module.exports = mongoose.model("Review", reviewSchema)
