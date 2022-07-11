@@ -11,23 +11,24 @@ const reviewSchema = new mongoose.Schema({
 
     reviewedBy : {
         type: String,
-        required : true,
-        value : "reviewer's name",
-        trim : true
+        default : "Guest",
+        trim : true,
     },
 
     reviewedAt : {
         type : Date,
-        required : true,
+        default : new Date()
     },
 
     rating : {
         type : Number,
         required : true,
+        trim : true
     },
 
     review : {
         type : String,
+        trim : true
     },
 
     isDeleted : {
@@ -37,4 +38,4 @@ const reviewSchema = new mongoose.Schema({
 })
 
 
-modeule.export = mongoose.Model("review", reviewSchema)
+modeule.export = mongoose.Model("Review", reviewSchema)
