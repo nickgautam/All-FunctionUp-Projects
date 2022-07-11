@@ -6,19 +6,18 @@ const reviewSchema = new mongoose.Schema({
     bookId : {
         type : ObjectId,
         required : true,
-        ref : 'book'
+        ref : 'Book'
     },
 
     reviewedBy : {
         type: String,
-        required : true,
-        trim : true
+        default : "Guest",
+        trim : true,
     },
 
     reviewedAt : {
         type : Date,
-        required : true,
-        trim : true
+        default : new Date()
     },
 
     rating : {
@@ -39,4 +38,4 @@ const reviewSchema = new mongoose.Schema({
 })
 
 
-modeule.export = mongoose.Model("review", reviewSchema)
+modeule.export = mongoose.Model("Review", reviewSchema)
