@@ -12,6 +12,7 @@ const reviewSchema = new mongoose.Schema({
     reviewedBy : {
         type: String,
         default : "Guest",
+        required: true,
         trim : true,
     },
 
