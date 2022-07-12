@@ -1,13 +1,8 @@
-const { default: mongoose, trusted } = require("mongoose")
+// const { default: mongoose, trusted } = require("mongoose")
 const bookModel = require("../model/bookModel")
-const valid = require('../validation/validation')
+const validator = require('../validation/validation')
 const moment = require("moment")
-
-
-
-function isNum(val) {
-    return !isNaN(val)
-}
+const reviewModel = require("../model/reviewModel")
 
 const isValidString = function (value) {
     if (typeof value === "undefined" || value === null) return false
@@ -31,14 +26,14 @@ const validateSubCategory = (subcategory) => {
 const createBook = async function (req, res) {
     try {
         let data = req.body
-        let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data
+        let { title, excerpt, ISBN, category, subcategory, releasedAt } = data
 
-        if (Object.keys(data).length == 0) {
-            return res.status(400).send({
-                status: false,
-                message: "please provide input in request body"
-            })
-        }
+        // if (Object.keys(data).length == 0) {
+        //     return res.status(400).send({
+        //         status: false,
+        //         message: "please provide input in request body"
+        //     })
+        // }
 
         if (!title) {
             return res.status(400).send({
@@ -52,6 +47,14 @@ const createBook = async function (req, res) {
                 message: "title should be string & can't be empty"
             })
         }
+// title number problem handled with below code. //1546547487
+        if (!isNaN(title)) {
+            return res.status(400).send({
+                status: false,
+                message: "title can't be a number"
+            })
+        }
+
         let checkTitle = await bookModel.findOne({ title: title })
         if (checkTitle) {
             return res.status(400).send({
@@ -73,18 +76,26 @@ const createBook = async function (req, res) {
             })
         }
 
-        if (!userId) {
+   // excerpt number problem handled with below code.     
+        if (!isNaN(excerpt)) {
             return res.status(400).send({
                 status: false,
-                message: "userId is mandatory"
+                message: "excerpt can't be a number"
             })
         }
-        if (!mongoose.isValidObjectId(userId)) {
-            return res.status(400).send({
-                status: false,
-                message: "userId is invalid"
-            })
-        }
+
+        // if (!userId) {
+        //     return res.status(400).send({
+        //         status: false,
+        //         message: "userId is mandatory"
+        //     })
+        // }
+        // if (!validator.isValidObjectId(userId)) {
+        //     return res.status(400).send({
+        //         status: false,
+        //         message: "userId is invalid"
+        //     })
+        // }
 
         if (!ISBN) {
             return res.status(400).send({
@@ -129,7 +140,9 @@ const createBook = async function (req, res) {
             })
         }
 
-        if (isNum(category) == true) {
+        
+   // category number problem handled with below code.   
+        if (!isNaN(category)) {
             return res.status(400).send({
                 status: false,
                 message: "category can't be a number"
@@ -146,6 +159,15 @@ const createBook = async function (req, res) {
         if (subcategory !== undefined)
             req.body.subcategory = validateSubCategory(req.body.subcategory)
 
+// subcategory number problem handled with below code. 
+            if (!isNaN(subcategory)) {
+                return res.status(400).send({
+                    status: false,
+                    message: "subcategory can't be a number"
+                })
+            }
+    
+
         if (!releasedAt) {
             return res.status(400).send({
                 status: false,
@@ -160,6 +182,16 @@ const createBook = async function (req, res) {
             })
         }
 
+        let today = new Date();
+        let date = today.getFullYear() + '-' + '0' + (today.getMonth() + 1) + '-' + today.getDate();
+
+
+        if (!(date == releasedAt)) {
+            return res.status(400).send({
+                status: false,
+                message: " Please enter current date with format : YYYY-MM-DD "
+            })
+        }
 
         let saveData = await bookModel.create(data)
 
@@ -191,9 +223,16 @@ const getBook = async function (req, res) {
 
 
         if (userId) {
-            let regex = /^[0-9a-f]{24}$/;
-            if (!regex.test(userId))
-                return res.status(400).send({ status: false, message: `userId is not valid` });
+            // let regex = /^[0-9a-f]{24}$/;
+            // if (!regex.test(userId))
+            //     return res.status(400).send({ status: false, message: `userId is not valid` });
+
+            if (!validator.isValidObjectId(userId)) {
+                return res.status(400).send({
+                    status: false,
+                    message: `userId is not valid`
+                });
+            }
 
             filterQuery["userId"] = userId
         }
@@ -207,7 +246,7 @@ const getBook = async function (req, res) {
         }
 
 
-        let allbooks = await bookModel.find(filterQuery).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1 }).sort({ title: 1 })  //<---------<
+        let allbooks = await bookModel.find(filterQuery).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, reviews:1, releasedAt: 1 }).sort({ title: 1 })  //<---------<
         console.log(allbooks)
         if (allbooks.length == 0) return res.status(404).send({ status: false, message: "No book found" })
 
@@ -229,20 +268,33 @@ const getBook = async function (req, res) {
 const getBookById = async function (req, res) {
     try {
         let bookId = req.params.bookId
-        let regex = /^[0-9a-f]{24}$/;
-        if (!regex.test(bookId))
-            return res.status(400).send({ status: false, message: `bookId is not valid` });
-        let allBooks = await bookModel.findById(bookId)
+        // let regex = /^[0-9a-f]{24}$/;
+        // if (!regex.test(bookId))
+        //     return res.status(400).send({ status: false, message: `bookId is not valid` });
+
+        if(!validator.isValidObjectId(bookId)){
+            return res.status(400).send({
+                        status: false,
+                        message: `bookId is not valid`
+                    });
+        }
+
+        let allBooks = await bookModel.findById(bookId) 
+
         if (!allBooks) {
             return res.status(404).send({
                 status: false,
                 message: "No book found"
             })
         }
+
+        let allReviews = await reviewModel.find({bookId:bookId})
+        let  bookWithReviews = await bookModel.findOneAndUpdate({_id:bookId}, {$set: {reviewsData: allReviews}}, {new: true, upsert:true, strict: false})
+        
         return res.status(200).send({
             status: true,
             message: "Book List",
-            data: allBooks
+            data: bookWithReviews
         })
 
     }
@@ -264,6 +316,13 @@ const updateBookById = async function (req, res) {
         const data = req.body
         let bookId = req.params.bookId
         const { title, excerpt, ISBN } = data
+
+        if (Object.keys(data).length == 0) {
+            res.status(400).send({
+                status: false,
+                message: "request body can't be empty"
+            })
+        }
 
         let updateQuery = {}
 
@@ -305,18 +364,12 @@ const updateBookById = async function (req, res) {
 
         console.log(updateQuery)
 
-        if (Object.keys(data).length == 0) {
-            res.status(400).send({
-                status: false,
-                message: "request body can't be empty"
-            })
-        }
 
         const updateData = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, updateQuery, { new: true })
         if (!updateData) {
             return res.status(404).send({
                 status: false,
-                message: "Either book is not exist with this bookId or book is deleted, so you can't update"
+                message: " book is deleted, so you can't update"
             })
         }
 

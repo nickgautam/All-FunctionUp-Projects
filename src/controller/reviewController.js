@@ -1,13 +1,7 @@
 const bookModel = require('../model/bookModel')
 const reviewModel = require('../model/reviewModel')
 const moment = require('moment')
-const { findById } = require('../model/userModel')
 const validator = require('../validation/validation')
-
-
-// function isNum(val) {     //5
-//     return !isNaN(val)
-// }
 
 const isValidString = function (value) {
     if (typeof value === "undefined" || value === null) return false
@@ -26,12 +20,20 @@ const createReview = async function (req, res) {
 
         reviewData["bookId"] = bookId
 
-        if (!/^[0-9a-f]{24}$/.test(bookId)) {
+        // if (!/^[0-9a-f]{24}$/.test(bookId)) {
+        //     return res.status(400).send({
+        //         status: false,
+        //         message: `bookId is not valid`
+        //     });
+        // }
+
+        if(!validator.isValidObjectId(bookId)){
             return res.status(400).send({
-                status: false,
-                message: `bookId is not valid`
-            });
+                        status: false,
+                        message: `bookId is not valid`
+                    });
         }
+
 
         const checkBookId = await bookModel.findById(bookId)
         if (!checkBookId) {
@@ -58,14 +60,14 @@ const createReview = async function (req, res) {
         if (!isValidString(reviewedBy)) {
             return res.status(400).send({
                 status: false,
-                message: "reviewedBy should be string & can't be empty "
+                message: "reviewedBy should be string & can't be empty"
             })
         }
 
         if (!isNaN(reviewedBy)) {
             return res.status(400).send({
                 status: false,
-                message: "reviewedBy can't be number "
+                message: "reviewedBy can't be number"
             })
         }
 
@@ -107,15 +109,21 @@ const createReview = async function (req, res) {
         if (isNaN(rating)) {
             return res.status(400).send({
                 status: false,
-                message: " rating should be a number only  "
+                message: " rating should be a number only & should not inside quotes "
             })
         }
-
+// rating type number is handled with below not 
+        // if(typeof rating== "string"){
+        //     return res.status(400).send({
+        //         status: false,
+        //         message: " rating should be a number only & should not inside quotes"
+        //     })
+        // }
 
         if (!(rating <= 5 && rating >= 1)) {
             return res.status(400).send({
                 status: false,
-                message: " Please take review on 1 to 5  "
+                message: " Please take rating on 1 to 5  "
             })
         }
 
@@ -130,14 +138,14 @@ const createReview = async function (req, res) {
 
 
 
-        await bookModel.findOneAndUpdate({ _id: bookId }, { $inc: { reviews: 1 } })
-
-
+        let postReview= await bookModel.findOneAndUpdate({ _id: bookId, isDeleted:false }, { $inc: { reviews: 1 } })
+        const bookDetails= await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, {$set: {reviewsData:[reviewData]}}, {new: true,upsert: true, strict: false})
+   
         const saveReview = await reviewModel.create(reviewData)
         return res.status(201).send({
             status: true,
             message: "Review successfully Created",
-            data: saveReview
+            data: bookDetails
         })
     }
     catch (err) {
@@ -166,21 +174,12 @@ const updateReviewById = async function (req, res) {
 
         reviewData["bookId"] = bookId
 
-        // if (!/^[0-9a-f]{24}$/.test(bookId)) {
-        //     return res.status(400).send({
-        //         status: false,
-        //         message: `bookId is not valid`
-        //     });
-        // }
-
         if(!validator.isValidObjectId(bookId)){
             return res.status(400).send({
                         status: false,
-                        message: `bookId is not valid by mongoose`
+                        message: `bookId is not valid`
                     });
         }
-
-        //f11 *****************
 
         const checkBookId = await bookModel.findById(bookId)
         if (!checkBookId) {
@@ -190,11 +189,11 @@ const updateReviewById = async function (req, res) {
             });
         }
 
-        if (!/^[0-9a-f]{24}$/.test(reviewId)) {
+        if(!validator.isValidObjectId(reviewId)){
             return res.status(400).send({
-                status: false,
-                message: `reviewId is not valid`
-            });
+                        status: false,
+                        message: `reviewId is not valid`
+                    });
         }
 
         const checkReviewId = await reviewModel.findById(reviewId)
@@ -204,8 +203,6 @@ const updateReviewById = async function (req, res) {
                 message: `No Review Found`
             });
         }
-
-
 
         if (Object.keys(reviewData).length == 0) {
             return res.status(400).send({
@@ -221,17 +218,16 @@ const updateReviewById = async function (req, res) {
             if (!isValidString(reviewedBy)) {
                 return res.status(400).send({
                     status: false,
-                    message: "reviewedBy should be string & can't be empty "
+                    message: "reviewedBy should be string & can't be empty"
                 })
             }
 
             if (!isNaN(reviewedBy)) {
                 return res.status(400).send({
                     status: false,
-                    message: "reviewedBy can't be number "
+                    message: "reviewedBy can't be number"
                 })
             }
-
 
             updateQuery["reviewedBy"] = reviewedBy
         }
@@ -241,17 +237,16 @@ const updateReviewById = async function (req, res) {
             if (!isValidString(req.body["reviewer's name"])) {
                 return res.status(400).send({
                     status: false,
-                    message: "reviewer's name should be string & can't be empty "
+                    message: "reviewer's name should be string & can't be empty"
                 })
             }
 
             if (!isNaN(req.body["reviewer's name"])) {
                 return res.status(400).send({
                     status: false,
-                    message: "reviewer's name can't be number "
+                    message: "reviewer's name can't be number"
                 })
             }
-
 
             updateQuery["reviewedBy"] = req.body["reviewer's name"]
         }
@@ -288,12 +283,12 @@ const updateReviewById = async function (req, res) {
         updateQuery["reviewedAt"] = moment().format("YYYY-MM-DDThh:mm:ss.SSS[Z]")
 
         const newReview = await reviewModel.findOneAndUpdate({ _id: reviewId, isDeleted: false },  updateQuery ,{new:true})
-
+        const bookDetails= await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, {$set: {reviewsData:[newReview]}}, {new: true,upsert: true, strict: false})
 
         res.status(200).send({
             status: true,
             message: "review successfully updated",
-            data: newReview
+            data: bookDetails
         })
     } catch (err) {
         console.log(err.message)
