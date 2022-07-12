@@ -2,33 +2,6 @@ const userModel = require('../model/userModel')
 const validator = require('../validation/validation')
 const jwt = require("jsonwebtoken");
 
-function isNum(val) {
-    return !isNaN(val)
-}
-const isValidString = function (value) {
-    if (typeof value === "undefined" || value === null) return false
-    if (typeof value !== "string" || value.trim().length === 0) return false
-    return true;
-}
-
-//                        (?=.*[0-9]) atleast one digit 
-//                        (?=.*[a-z]) atleast one lowercase letter
-//                        (?=.*[!@#$%^&*]) atleast one special charactor
-//                         [a-zA-Z0-9!@#$%^&*]{8,15} length in b/w in 8 to 15 and any char belongs to [a-z0-9!@#$%^&*]
-const validatePassword = (password, res) => {
-    let regex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])[a-z0-9!@#$%^&*]{8,15}$/
-    if (!regex.test(password)) {
-        res.status(400).send({ status: false, msg: "Password must contain atleast one lowercase, one special character, there should not be any space and length of password must be in range [8-15]" })
-        return false;
-    }
-    return true;
-}                       
-
-let regexName =    /^[A-Za-z. -]+$/   
-let regexPhone = /^[6789]\d{9}$/
-let regexPincode = /^\d{6}$/
-let regexEmail = /^[a-z0-9.]{2,}@+[a-z]{3,5}\.[a-z]{2,3}$/ //"nk@gmail.com"
-
 //***************************************** createUser **********************************************************/
 
 const createUser = async function (req, res) {
@@ -65,14 +38,14 @@ const createUser = async function (req, res) {
             })
         }
 
-        if (!regexName.test(name)) {
+        if (!/^[A-Za-z. -]+$/.test(name)) {
             return res.status(400).send({
                 status: false,
                 message: "name is invalid"
             })
         }
 
-        if (!isValidString(name)) {
+        if (!validator.isValidString(name)) {
             return res.status(400).send({
                 status: false,
                 message: "name should be a string, doesn't have whitespace"
@@ -81,7 +54,7 @@ const createUser = async function (req, res) {
 
         if (!phone) return res.status(400).send({ status: false, message: "phone is mandatory" })
 
-        if (!regexPhone.test(phone)) return res.status(400).send({ status: false, message: "phone is invalid" })
+        if (!/^[6789]\d{9}$/.test(phone)) return res.status(400).send({ status: false, message: "phone is invalid" })
 
         let checkPhone = await userModel.findOne({ phone: phone })
 
@@ -98,11 +71,11 @@ const createUser = async function (req, res) {
                 message: "email is mandatory"
             })
         }
-// ""
-        if (!regexEmail.test(email)) { return res.status(400).send({ status: false, message: "email should look like this anything@anything.com, and should not any space" }) }
 
-        if (!isValidString(email)) return res.status(400).send({ status: false, message: "email should be a string, shouldn't have whitespace" })
-          
+        if (!/^[a-z0-9.]{2,}@+[a-z]{3,5}\.[a-z]{2,3}$/.test(email)) { return res.status(400).send({ status: false, message: "email should look like this anything@anything.com, and should not any space" }) }
+
+        if (!validator.isValidString(email)) return res.status(400).send({ status: false, message: "email should be a string, shouldn't have whitespace" })
+
         let checkEmail = await userModel.findOne({ email: email })
         if (checkEmail) {
             return res.status(400).send({
@@ -118,97 +91,108 @@ const createUser = async function (req, res) {
             })
         }
 
-        if (password !== undefined)
-            if (!validatePassword(password, res)) return;
+        if (!validator.validatePassword(password, res)) return;
 
         if (address) {
             if (Object.keys(address).length == 0) return res.status(400).send({ status: false, message: "address can't be empty" })
 
-            if (!isValidString(address.street)) {
+            if (!validator.isValidString(address.street)) {
                 return res.status(400).send({
                     status: false,
                     message: "street should be a string, shouldn't have whitespace"
                 })
             }
 
-            if (!isValidString(address.city)) {
+            if (!validator.isValidString(address.city)) {
                 return res.status(400).send({
                     status: false,
                     message: "city should be a string, shouldn't have whitespace"
                 })
             }
 
-           if (!isValidString(address.pincode)) return res.status(400).send({ status: false, message: "pincode should be a number, inside quotes, and shouldn't have whitespace" })
-
-            if (isNum(address.city) == true) {
+            if (!isNaN(address.city)) {
                 return res.status(400).send({
                     status: false,
                     message: "city can't be a number"
                 })
             }
 
-            if (!regexPincode.test(address.pincode)) {
+            if (!validator.isValidString(address.pincode)) {
+                return res.status(400).send({
+                    status: false,
+                    message: "pincode should be a number, inside quotes, and shouldn't have whitespace"
+                })
+            }
+
+            if (!/^\d{6}$/.test(address.pincode)) {
                 return res.status(400).send({
                     status: false,
                     message: "pincode is invalid"
                 })
             }
-
         }
 
         let saveData = await userModel.create(data)
-        return res.status(201).send({ status: true, message: 'Success', data: saveData })
+        return res.status(201).send({ 
+            status: true, 
+            message: 'User Successfully Created', 
+            data: saveData 
+        })
 
     } catch (err) { return res.status(500).send({ status: false, message: err.message }) }
 }
 
 
-//*****************************************LoginUser **********************************************************/
+//***************************************** LoginUser **********************************************************/
 
 const userLogin = async function (req, res) {
-
-  
 
     try {
 
         const loginData = req.body
         const { email, password } = loginData
 
-        
         if (Object.keys(loginData).length == 0) {
-            res.status(400).send({ status: false, message: "login credentials must be presents & only email and password should be inside body" })
-            return
+            return res.status(400).send({ 
+                status: false, 
+                message: "login credentials must be presents & only email and password should be inside body" 
+            })
+            
         }
+
         if (!email) {
-            return res.status(400).send({ 
-                status: false, 
-                message: "email must be present " 
+            return res.status(400).send({
+                status: false,
+                message: "email must be present "
             })
         }
+
         if (!password) {
-            return res.status(400).send({ 
-                status: false, 
-                message: "password must be present " 
+            return res.status(400).send({
+                status: false,
+                message: "password must be present "
             })
         }
+
         const user = await userModel.findOne({ email: email, password: password })
         if (!user) {
             return res.status(401).send({ status: false, message: "Make sure your login Credentials are correct or not " })
-            
+
         }
+
         const token = await jwt.sign({
             userId: user._id,
             iat: Math.floor(Date.now() / 1000),
-            exp: Math.floor(Date.now() / 1000) + 20 * 60 * 60
+            exp: Math.floor(Date.now() / 1000) + 23 * 60 * 60
         }, "my@third@project@book@management")
 
         res.setHeader('x-api-key', token)
         res.status(201).send({ status: true, message: 'user login successfully', data: token })
 
     } catch (error) {
-        return res.status(500).send({ 
-            status: false, 
-            message: error.message 
+        return res.status(500).send({
+            status: false,
+            message: error.message
         })
     }
 }

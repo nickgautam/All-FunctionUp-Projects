@@ -2,16 +2,9 @@ const bookModel = require('../model/bookModel')
 const reviewModel = require('../model/reviewModel')
 const moment = require('moment')
 const validator = require('../validation/validation')
-const { isValidObjectId } = require('mongoose')
 
-const isValidString = function (value) {
-    if (typeof value === "undefined" || value === null) return false
-    if (typeof value !== "string" || value.trim().length === 0) return false //"gdfgyfdghf"
-    return true;
-}
 
 //***************************************** createReview **********************************************************/
-
 
 const createReview = async function (req, res) {
     try {
@@ -21,20 +14,12 @@ const createReview = async function (req, res) {
 
         reviewData["bookId"] = bookId
 
-        // if (!/^[0-9a-f]{24}$/.test(bookId)) {
-        //     return res.status(400).send({
-        //         status: false,
-        //         message: `bookId is not valid`
-        //     });
-        // }
-
         if (!validator.isValidObjectId(bookId)) {
             return res.status(400).send({
                 status: false,
                 message: `bookId is not valid`
             });
         }
-
 
         const checkBookId = await bookModel.findById(bookId)
         if (!checkBookId) {
@@ -58,7 +43,7 @@ const createReview = async function (req, res) {
             })
         }
 
-        if (!isValidString(reviewedBy)) {
+        if (!validator.isValidString(reviewedBy)) {
             return res.status(400).send({
                 status: false,
                 message: "reviewedBy should be string & can't be empty"
@@ -113,18 +98,11 @@ const createReview = async function (req, res) {
                 message: " rating should be a number only & should not inside quotes "
             })
         }
-        // rating type number is handled with below not 
-        // if(typeof rating== "string"){
-        //     return res.status(400).send({
-        //         status: false,
-        //         message: " rating should be a number only & should not inside quotes"
-        //     })
-        // }
-
+     
         if (!(rating <= 5 && rating >= 1)) {
             return res.status(400).send({
                 status: false,
-                message: " Please take rating on 1 to 5  "
+                message: " Please take rating on 1 to 5"
             })
         }
 
@@ -137,12 +115,12 @@ const createReview = async function (req, res) {
             }
         }
 
-
-
-        let postReview = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { $inc: { reviews: 1 } })
-        const bookDetails = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { $set: { reviewsData: [reviewData] } }, { new: true, upsert: true, strict: false })
-
         const saveReview = await reviewModel.create(reviewData)
+
+        await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { $inc: { reviews: 1 } })
+
+        const bookDetails = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { $set: { reviewsData: [saveReview] } }, { new: true, upsert: true, strict: false })
+
         return res.status(201).send({
             status: true,
             message: "Review successfully Created",
@@ -150,20 +128,14 @@ const createReview = async function (req, res) {
         })
     }
     catch (err) {
-        console.log(err.message)
         return res.status(500).send({
             status: false,
             message: err.message
         })
     }
-
-
 }
 
-
 //***************************************** updateReviewById **********************************************************/
-
-
 
 const updateReviewById = async function (req, res) {
     try {
@@ -216,7 +188,7 @@ const updateReviewById = async function (req, res) {
 
         if (reviewedBy) {
 
-            if (!isValidString(reviewedBy)) {
+            if (!validator.isValidString(reviewedBy)) {
                 return res.status(400).send({
                     status: false,
                     message: "reviewedBy should be string & can't be empty"
@@ -235,7 +207,7 @@ const updateReviewById = async function (req, res) {
 
         if (req.body["reviewer's name"]) {
 
-            if (!isValidString(req.body["reviewer's name"])) {
+            if (!validator.isValidString(req.body["reviewer's name"])) {
                 return res.status(400).send({
                     status: false,
                     message: "reviewer's name should be string & can't be empty"
@@ -341,7 +313,7 @@ const deleteReviewById = async function (req, res) {
             }
 
         const deleteReview = await reviewModel.findOneAndUpdate({_id:reviewId, isDeleted: false},{$set: {isDeleted:true}},{new:true})  
-console.log(deleteReview);
+
         if(!deleteReview){
            return res.status(400).send({
                 status: true,
@@ -351,13 +323,9 @@ console.log(deleteReview);
 
         await bookModel.findOneAndUpdate({_id:bookId},{$inc: {reviews: -1}}, {new: true})
 
-        const modifiedBook = await bookModel.findOneAndUpdate({ _id:bookId },{$set:{reviewsData:[deleteReview]}}, {new:true, upsert:true, strict:false})
-
         return res.status(200).send({
             status: true,
             message: "review successfully Deleted",
-            data: modifiedBook
-
         })
 
     } catch (err) {
