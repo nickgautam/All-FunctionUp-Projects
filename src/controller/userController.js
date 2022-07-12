@@ -1,5 +1,5 @@
 const userModel = require('../model/userModel')
-const vd = require('../validation/validation')
+const validator = require('../validation/validation')
 const jwt = require("jsonwebtoken");
 
 function isNum(val) {

@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const bookModel = require('../model/bookModel');
-
+const userModel = require('../model/userModel')
+const validator = require('../validation/validation')
 
 /*--------------------------------------Authentication for all books related Api--------------------------------*/
 const authentication = async function (req, res, next) {
@@ -27,7 +28,7 @@ module.exports.authentication = authentication
 
 
 
-/*--------------------------------------Authoraisation for create book Api--------------------------------*/
+/*--------------------------------------Authorisation for create book Api--------------------------------*/
 
 const authorisationCreateBook = async function (req, res, next) {
     try {
@@ -38,10 +39,41 @@ const authorisationCreateBook = async function (req, res, next) {
         }
         let decodedToken = jwt.verify(token, "my@third@project@book@management");
         console.log(decodedToken)
-        let userId = req.body.userId;
-        let regex = /^[0-9a-f]{24}$/;
-        if (!regex.test(userId))
-            return res.status(400).send({ status: false, message: `userId is not valid` });
+
+        let data = req.body
+        let userId = data.userId;
+
+        if (Object.keys(data).length == 0) {
+            return res.status(400).send({
+                status: false,
+                message: "Request body can't be empty"
+            })
+        }
+
+        if (!userId) {
+            return res.status(400).send({
+                status: false,
+                message: "userId is mandatory"
+            })
+        }
+        // let regex = /^[0-9a-f]{24}$/;
+        // if (!regex.test(userId))
+        //     return res.status(400).send({ status: false, message: `userId is not valid` });
+
+        if (!validator.isValidObjectId(userId)) {
+            return res.status(400).send({
+                status: false,
+                message: `userId is not valid`
+            });
+        }
+ 
+        let userExistance = await userModel.findById(userId)
+        if(!userExistance){
+            return res.status(404).send({
+                status: false, 
+                message: "No user exists with this userId"
+            })
+        }
 
         if (decodedToken.userId !== userId) {
             return res.status(403).send({ status: false, message: "User logged is not allowed to create the book" });
@@ -53,7 +85,7 @@ module.exports.authorisationCreateBook = authorisationCreateBook;
 
 
 
-/*--------------------------------------Authoraisation for update books and delete books Api--------------------------------*/
+/*--------------------------------------Authorisation for update books and delete books Api--------------------------------*/
 
 const authorisationByParams = async function (req, res, next) {
     try {
@@ -65,12 +97,19 @@ const authorisationByParams = async function (req, res, next) {
         let decodedToken = jwt.verify(token, "my@third@project@book@management");
         console.log(decodedToken)
         let bookId = req.params.bookId;
-        let regex = /^[0-9a-f]{24}$/;
-        if (!regex.test(bookId))
-            return res.status(400).send({ status: false, message: `bookId is not valid` });
+        // let regex = /^[0-9a-f]{24}$/;
+        // if (!regex.test(bookId))
+        //     return res.status(400).send({ status: false, message: `bookId is not valid` });
+
+        if (!validator.isValidObjectId(bookId)) {
+            return res.status(400).send({
+                status: false,
+                message: `bookId is not valid`
+            });
+        }
 
         let particularBook = await bookModel.findById(bookId).select({ userId: 1, _id: 0 });
-
+        console.log(particularBook)
         if (!particularBook) return res.status(404).send({ status: false, message: "book doesn't exist with this bookId" })
 
         let newUserId = particularBook.userId;
