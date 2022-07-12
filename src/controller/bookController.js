@@ -152,10 +152,11 @@ const createBook = async function (req, res) {
             })
         }
 
-        data.releasedAt = new Date().toISOString()
-
-        let saveData = await bookModel.create(data)
-
+       // data.releasedAt = new Date().toISOString()
+        
+        await bookModel.create(data)
+    
+        let saveData = await bookModel.findOneAndUpdate({title:title},{$set:{deletedAt: ""}},{new: true, upsert: true, strict: false})
         return res.status(201).send({
             status: true,
             message: "Book Created Successfully",
@@ -347,7 +348,7 @@ const updateBookById = async function (req, res) {
                 })
             }
 
-            req.body["release date"] = new Date().toISOString()
+            // req.body["release date"] = new Date().toISOString()
 
 
 
@@ -374,7 +375,7 @@ const updateBookById = async function (req, res) {
                 })
             }
 
-            updateQuery["releasedAt"] = new Date().toISOString
+            // updateQuery["releasedAt"] = new Date().toISOString
         }
 
         if (ISBN) {
@@ -444,8 +445,8 @@ const deleteBookById = async function (req, res) {
             })
         }
 
-        let bookForDelete = await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { isDeleted: true } }, { new: true })
-
+        let bookForDelete = await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { isDeleted: true , deletedAt: moment().format("YYYY-MM-DDThh:mm:ss.SSS[Z]")} }, { new: true,upsert:true, strict:false })
+console.log(bookForDelete)
         return res.status(200).send({
             status: true, 
             message: "Successfully delete", 
