@@ -136,12 +136,13 @@ const createReview = async function (req, res) {
             }
         }
 
-
+        const saveReview = await reviewModel.create(reviewData)
 
         let postReview= await bookModel.findOneAndUpdate({ _id: bookId, isDeleted:false }, { $inc: { reviews: 1 } })
-        const bookDetails= await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, {$set: {reviewsData:[reviewData]}}, {new: true,upsert: true, strict: false})
+       
+        const bookDetails= await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, {$set: {reviewsData:[saveReview]}}, {new: true,upsert: true, strict: false})
    
-        const saveReview = await reviewModel.create(reviewData)
+       
         return res.status(201).send({
             status: true,
             message: "Review successfully Created",
