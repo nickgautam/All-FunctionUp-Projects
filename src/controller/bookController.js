@@ -288,7 +288,7 @@ const getBookById = async function (req, res) {
             })
         }
 
-        let allReviews = await reviewModel.find({bookId:bookId})
+        let allReviews = await reviewModel.find({bookId:bookId, isDeleted:false})
         let  bookWithReviews = await bookModel.findOneAndUpdate({_id:bookId}, {$set: {reviewsData: allReviews}}, {new: true, upsert:true, strict: false})
         
         return res.status(200).send({
