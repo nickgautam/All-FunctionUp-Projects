@@ -3,7 +3,8 @@ const bookModel = require('../model/bookModel');
 const userModel = require('../model/userModel')
 const validator = require('../validation/validation')
 
-/*--------------------------------------Authentication for all books related Api--------------------------------*/
+//***************************************** Authentication for all books related Api **********************************************************/
+
 const authentication = async function (req, res, next) {
 
     try {
@@ -24,11 +25,9 @@ const authentication = async function (req, res, next) {
 
 }
 
-module.exports.authentication = authentication
 
+//***************************************** Authorisation for create book Api **********************************************************/
 
-
-/*--------------------------------------Authorisation for create book Api--------------------------------*/
 
 const authorisationCreateBook = async function (req, res, next) {
     try {
@@ -56,9 +55,7 @@ const authorisationCreateBook = async function (req, res, next) {
                 message: "userId is mandatory"
             })
         }
-        // let regex = /^[0-9a-f]{24}$/;
-        // if (!regex.test(userId))
-        //     return res.status(400).send({ status: false, message: `userId is not valid` });
+       
 
         if (!validator.isValidObjectId(userId)) {
             return res.status(400).send({
@@ -81,11 +78,11 @@ const authorisationCreateBook = async function (req, res, next) {
     } catch (err) { res.status(500).send({ status: false, message: err.message }) }
 
 }
-module.exports.authorisationCreateBook = authorisationCreateBook;
 
 
 
-/*--------------------------------------Authorisation for update books and delete books Api--------------------------------*/
+//***************************************** Authorisation for update books and delete books API **********************************************************/
+
 
 const authorisationByParams = async function (req, res, next) {
     try {
@@ -97,9 +94,7 @@ const authorisationByParams = async function (req, res, next) {
         let decodedToken = jwt.verify(token, "my@third@project@book@management");
         console.log(decodedToken)
         let bookId = req.params.bookId;
-        // let regex = /^[0-9a-f]{24}$/;
-        // if (!regex.test(bookId))
-        //     return res.status(400).send({ status: false, message: `bookId is not valid` });
+     
 
         if (!validator.isValidObjectId(bookId)) {
             return res.status(400).send({
@@ -109,11 +104,11 @@ const authorisationByParams = async function (req, res, next) {
         }
 
         let particularBook = await bookModel.findById(bookId).select({ userId: 1, _id: 0 });
-        console.log(particularBook)
+
         if (!particularBook) return res.status(404).send({ status: false, message: "book doesn't exist with this bookId" })
 
         let newUserId = particularBook.userId;
-        console.log(newUserId)
+      
 
         if (decodedToken.userId !== newUserId.toString())
             return res.status(403).send({ status: false, message: "User logged is not allowed to modified other's data" });
@@ -121,4 +116,9 @@ const authorisationByParams = async function (req, res, next) {
     } catch (err) { res.status(500).send({ status: false, message: err.message }) }
 
 }
+
+
+
+module.exports.authentication = authentication
+module.exports.authorisationCreateBook = authorisationCreateBook;
 module.exports.authorisationByParams = authorisationByParams;   
