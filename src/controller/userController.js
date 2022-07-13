@@ -1,6 +1,7 @@
 const userModel = require('../model/userModel')
 const validator = require('../validation/validation')
 const jwt = require("jsonwebtoken");
+const _ = require('lodash')
 
 //***************************************** createUser **********************************************************/
 
@@ -93,7 +94,16 @@ const createUser = async function (req, res) {
 
         if (!validator.validatePassword(password, res)) return;
 
+       
         if (address) {
+
+            if(!_.isObject(address)){
+                return res.status(400).send({
+                    status: false,
+                    message: "address should be an Obeject"
+                })
+            }
+
             if (Object.keys(address).length == 0) return res.status(400).send({ status: false, message: "address can't be empty" })
 
             if (!validator.isValidString(address.street)) {
