@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     name: { 
         type: String,
         required: true,
-        trim: true    // ""
+        trim: true   
         },
     phone: {
         type: String,
@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
     password: { 
         type: String,
         required: true,
-        trim: true //  "FGFHFG"
+        trim: true
         },
     address: {
       street: {type:String, trim: true},

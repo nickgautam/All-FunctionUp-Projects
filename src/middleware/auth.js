@@ -108,7 +108,7 @@ const authorisationByParams = async function (req, res, next) {
         if (!particularBook) return res.status(404).send({ status: false, message: "book doesn't exist with this bookId" })
 
         let newUserId = particularBook.userId;
-      
+        console.log(newUserId)
 
         if (decodedToken.userId !== newUserId.toString())
             return res.status(403).send({ status: false, message: "User logged is not allowed to modified other's data" });
@@ -116,7 +116,6 @@ const authorisationByParams = async function (req, res, next) {
     } catch (err) { res.status(500).send({ status: false, message: err.message }) }
 
 }
-
 
 
 module.exports.authentication = authentication
