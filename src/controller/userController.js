@@ -1,12 +1,7 @@
 const userModel = require('../model/userModel')
 const validator = require('../validation/validation')
 const jwt = require("jsonwebtoken");
-<<<<<<< HEAD
-const _ = require('lodash')
-
-=======
 const _ = require("lodash")
->>>>>>> 118711a90d3a8274bde4d977229d98e347b33892
 //***************************************** createUser **********************************************************/
 
 const createUser = async function (req, res) {
@@ -101,17 +96,10 @@ const createUser = async function (req, res) {
        
         if (address) {
 
-<<<<<<< HEAD
-            if(!_.isObject(address)){
-                return res.status(400).send({
-                    status: false,
-                    message: "address should be an Obeject"
-=======
             if(!_.isObject(address)) {
                 return res.status(400).send({
                     status: false,
                     message: "address should be an object"
->>>>>>> 118711a90d3a8274bde4d977229d98e347b33892
                 })
             }
 
