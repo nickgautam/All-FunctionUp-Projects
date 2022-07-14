@@ -1,12 +1,15 @@
-const express =  require('express')
-const bodyParser = require('body-parser')
-const mongoose = require('mongoose')
-const route = require('./route/route.js')
+const express =  require('express');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const route = require('./route/route.js');
+const multer = require('multer');
 
 const app = express()
 
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true}))
+app.use( multer().any() )
 
 
 const monngodb_url="mongodb+srv://NishantGautam:Ng123@cluster0.45vj3.mongodb.net/group44Database";

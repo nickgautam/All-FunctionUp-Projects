@@ -25,6 +25,7 @@ const bookSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+
     category: {
         type: String,
         required: true,
@@ -54,6 +55,9 @@ const bookSchema = new mongoose.Schema({
     releasedAt: {
         type: Date,
         required: true
+    },
+    bookCover:{
+        type: String
     }
 
 }, { timestamps: true });
