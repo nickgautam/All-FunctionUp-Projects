@@ -152,7 +152,7 @@ const createBook = async function (req, res) {
             })
         }
 
-       // data.releasedAt = new Date().toISOString()
+        data.releasedAt = new Date().toISOString()
         
         await bookModel.create(data)
     
@@ -348,7 +348,7 @@ const updateBookById = async function (req, res) {
                 })
             }
 
-            // req.body["release date"] = new Date().toISOString()
+             req.body["release date"] = new Date().toISOString()
 
 
 
@@ -375,7 +375,7 @@ const updateBookById = async function (req, res) {
                 })
             }
 
-            // updateQuery["releasedAt"] = new Date().toISOString
+            updateQuery["releasedAt"] = new Date().toISOString
         }
 
         if (ISBN) {
