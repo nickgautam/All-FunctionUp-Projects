@@ -36,18 +36,22 @@ const createReview = async function (req, res) {
             })
         }
 
-        if (!reviewedBy) {
-            return res.status(400).send({
-                status: false,
-                message: "reviewedBy is mandatory"
-            })
-        }
+        // if (!reviewedBy) {
+        //     return res.status(400).send({
+        //         status: false,
+        //         message: "reviewedBy is mandatory"
+        //     })
+        // }
 
-        if (!validator.isValidString(reviewedBy)) {
-            return res.status(400).send({
-                status: false,
-                message: "reviewedBy should be string & can't be empty"
-            })
+        if(reviewedBy){
+           
+            if (!validator.isValidString(reviewedBy)) {
+                return res.status(400).send({
+                    status: false,
+                    message: "reviewedBy should be string & can't be empty"
+                })
+            }
+
         }
 
         if (!isNaN(reviewedBy)) {

@@ -2,13 +2,18 @@ const bookModel = require("../model/bookModel")
 const validator = require('../validation/validation')
 const moment = require("moment")
 const reviewModel = require("../model/reviewModel")
+const aws = require('aws-sdk')
+
 
 //***************************************** createBook **********************************************************/
 
+
 const createBook = async function (req, res) {
     try {
+        console.log(req.files, req.body);
         let data = req.body
-        let { title, excerpt, ISBN, category, subcategory, releasedAt } = data
+        let { title, excerpt, ISBN, category, subcategory, releasedAt} = data
+        
 
         if (!title) {
             return res.status(400).send({
@@ -23,7 +28,7 @@ const createBook = async function (req, res) {
                 message: "title should be string & can't be empty"
             })
         }
-     
+
         if (!isNaN(title)) {
             return res.status(400).send({
                 status: false,
@@ -101,7 +106,7 @@ const createBook = async function (req, res) {
                 message: "category should be string & can't be empty"
             })
         }
- 
+
         if (!isNaN(category)) {
             return res.status(400).send({
                 status: false,
@@ -151,12 +156,34 @@ const createBook = async function (req, res) {
                 message: " Please enter current date with format : YYYY-MM-DD "
             })
         }
+        data.releasedAt = new Date().toISOString()
 
-       // data.releasedAt = new Date().toISOString()
-        
+
+
+
+        if(req.files[0]){
+
+        let files = req.files
+
+        console.log(files, "hello", files.length);
+        if (files && files.length > 0) {
+            //upload to s3 and get the uploaded link
+            // res.send the link back to frontend/postman
+            var uploadedFileURL = await uploadFile(files[0])
+            //    console.log(uploadedFileURL);
+            //    return res.status(201).send({msg: "file uploaded succesfully", data: uploadedFileURL})
+        }
+        else {
+            return res.status(400).send({ msg: "No file found" })
+        }
+
+        }
+
+        data.bookCover = uploadedFileURL
+
         await bookModel.create(data)
-    
-        let saveData = await bookModel.findOneAndUpdate({title:title},{$set:{deletedAt: ""}},{new: true, upsert: true, strict: false})
+
+        let saveData = await bookModel.findOneAndUpdate({ title: title }, { $set: { deletedAt: "" } }, { new: true, upsert: true, strict: false })
         return res.status(201).send({
             status: true,
             message: "Book Created Successfully",
@@ -172,6 +199,61 @@ const createBook = async function (req, res) {
     }
 
 }
+
+
+//***************************************** aws-section **********************************************************/
+
+aws.config.update({
+    accessKeyId: "AKIAY3L35MCRVFM24Q7U",
+    secretAccessKey: "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",
+    region: "ap-south-1"
+})
+
+let uploadFile = async (file) => {
+    return new Promise(function (resolve, reject) {
+        // this function will upload file to aws and return the link
+        let s3 = new aws.S3({ apiVersion: '2006-03-01' }); // we will be using the s3 service of aws
+
+        var uploadParams = {
+            ACL: "public-read",
+            Bucket: "classroom-training-bucket",  //HERE
+            Key: "xyz/" + file.originalname, //HERE 
+            Body: file.buffer
+        }
+
+
+        s3.upload(uploadParams, function (err, data) {
+            if (err) {
+                return reject({ "error": err })
+            }
+            //  console.log(data)
+            //  console.log("file uploaded succesfully")
+            return resolve(data.Location)
+        })
+
+        // let data= await s3.upload( uploadParams)
+        // if( data) return data.Location
+        // else return "there is an error"
+
+    })
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //***************************************** getBook **********************************************************/
@@ -273,7 +355,7 @@ const updateBookById = async function (req, res) {
         let bookId = req.params.bookId
         const { title, excerpt, ISBN } = data
 
-        if (Object.keys(data).length == 0) {
+        if (Object.keys(data).length == 0) {   // [ ]
             res.status(400).send({
                 status: false,
                 message: "request body can't be empty"
@@ -305,6 +387,7 @@ const updateBookById = async function (req, res) {
                     message: "book already present with this title"
                 })
             }
+
             updateQuery["title"] = title;
         }
 
@@ -338,8 +421,8 @@ const updateBookById = async function (req, res) {
             let today = new Date();
             let date = today.getFullYear() + '-' + '0' + (today.getMonth() + 1) + '-' + today.getDate();
 
-            
-        
+
+
 
             if (!(date == req.body["release date"])) {
                 return res.status(400).send({
@@ -439,25 +522,25 @@ const deleteBookById = async function (req, res) {
         let saveData = await bookModel.findOne({ _id: bookId, isDeleted: false })
 
         if (!saveData) {
-            return res.status(400).send({ 
-                status: false, 
-                message: "You can't delete again, Book is already deleted" 
+            return res.status(400).send({
+                status: false,
+                message: "You can't delete again, Book is already deleted"
             })
         }
 
-        let bookForDelete = await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { isDeleted: true , deletedAt: moment().format("YYYY-MM-DDThh:mm:ss.SSS[Z]")} }, { new: true,upsert:true, strict:false })
-console.log(bookForDelete)
+        let bookForDelete = await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { isDeleted: true, deletedAt: moment().format("YYYY-MM-DDThh:mm:ss.SSS[Z]") } }, { new: true, upsert: true, strict: false })
+        console.log(bookForDelete)
         return res.status(200).send({
-            status: true, 
-            message: "Successfully delete", 
-            data: bookForDelete 
+            status: true,
+            message: "Successfully delete",
+            data: bookForDelete
         })
 
-    } catch (err) { 
-        return res.status(500).send({ 
-            status: false, 
-            message: err.message 
-        }) 
+    } catch (err) {
+        return res.status(500).send({
+            status: false,
+            message: err.message
+        })
     }
 }
 
