@@ -71,7 +71,7 @@ const createUser = async function (req, res) {
                 message: "email is mandatory"
             })
         }
-
+//nk12@gmail.com
         if (!/^[a-z0-9.]{2,}@+[a-z]{3,5}\.[a-z]{2,3}$/.test(email)) { return res.status(400).send({ status: false, message: "email should look like this anything@anything.com, and should not any space" }) }
 
         if (!validator.isValidString(email)) return res.status(400).send({ status: false, message: "email should be a string, shouldn't have whitespace" })

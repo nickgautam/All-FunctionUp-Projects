@@ -147,7 +147,7 @@ const updateReviewById = async function (req, res) {
         const reviewId = req.params.reviewId
 
         const reviewData = req.body
-        const { reviewedBy, rating, review, } = reviewData
+        const { reviewedBy, rating, review } = reviewData
 
         reviewData["bookId"] = bookId
 
@@ -240,7 +240,7 @@ const updateReviewById = async function (req, res) {
             if (!(rating <= 5 && rating >= 1)) {
                 return res.status(400).send({
                     status: false,
-                    message: " Please take review on 1 to 5  "
+                    message: " Please take rating on 1 to 5  "
                 })
             }
             updateQuery["rating"] = rating

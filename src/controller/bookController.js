@@ -24,7 +24,7 @@ const createBook = async function (req, res) {
         if (!validator.isValidString(title)) {
             return res.status(400).send({
                 status: false,
-                message: "title should be string & can't be empty"
+                message: "title should be string & can't be empty & can't have whitespace"
             })
         }
 
@@ -39,7 +39,7 @@ const createBook = async function (req, res) {
         if (checkTitle) {
             return res.status(400).send({
                 status: false,
-                message: "title is already present in bookModel"
+                message: "title is already present in bookCollection"
             })
         }
 
@@ -52,7 +52,7 @@ const createBook = async function (req, res) {
         if (!validator.isValidString(excerpt)) {
             return res.status(400).send({
                 status: false,
-                message: "excerpt should be string & can't be empty"
+                message: "excerpt should be string & can't be empty & can't have whitespace"
             })
         }
 
@@ -88,7 +88,7 @@ const createBook = async function (req, res) {
         if (checkISBN) {
             return res.status(400).send({
                 status: false,
-                message: "ISBN is already present in bookModel"
+                message: "ISBN is already present in bookCollection"
             })
         }
 
@@ -294,7 +294,7 @@ const updateBookById = async function (req, res) {
         const { title, excerpt, ISBN } = data
 
         if (Object.keys(data).length == 0) {  
-            res.status(400).send({
+            return res.status(400).send({
                 status: false,
                 message: "request body can't be empty"
             })
@@ -320,7 +320,7 @@ const updateBookById = async function (req, res) {
 
             const checkTitle = await bookModel.findOne({ title: title })
             if (checkTitle) {
-                res.status(400).send({
+               return res.status(400).send({
                     status: false,
                     message: "book already present with this title"
                 })
@@ -418,7 +418,7 @@ const updateBookById = async function (req, res) {
 
             const checkISBN = await bookModel.findOne({ ISBN: ISBN })
             if (checkISBN) {
-                res.status(400).send({
+                 return res.status(400).send({
                     status: false,
                     message: "book already present with this ISBN"
                 })
@@ -436,8 +436,8 @@ const updateBookById = async function (req, res) {
             })
         }
 
-        res.status(200).send({ status: true, message: "success", data: updateData })
-        return
+        return res.status(200).send({ status: true, message: "successfully updated", data: updateData })
+       
 
     }
     catch (err) {
