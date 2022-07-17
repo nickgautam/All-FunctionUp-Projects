@@ -10,7 +10,7 @@ const createUser = async function (req, res) {
         let data = req.body
         let { title, name, phone, email, password, address } = data
 
-        if (Object.keys(data).length == 0) {
+        if (Object.keys(data).length == 0) {     // [ ] ===> { }
             return res.status(400).send({
                 status: false,
                 message: "Request body can't be empty"
