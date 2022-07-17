@@ -35,14 +35,7 @@ const createReview = async function (req, res) {
                 message: "Body can't be empty"
             })
         }
-
-        // if (!reviewedBy) {
-        //     return res.status(400).send({
-        //         status: false,
-        //         message: "reviewedBy is mandatory"
-        //     })
-        // }
-
+        
         if(reviewedBy){
            
             if (!validator.isValidString(reviewedBy)) {
