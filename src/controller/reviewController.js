@@ -149,6 +149,13 @@ const updateReviewById = async function (req, res) {
         const reviewData = req.body
         const { reviewedBy, rating, review } = reviewData
 
+        if (Object.keys(reviewData).length == 0) {
+            return res.status(400).send({
+                status: false,
+                message: "Body can't be empty"
+            })
+        }
+
         reviewData["bookId"] = bookId
 
         if (!validator.isValidObjectId(bookId)) {
@@ -181,12 +188,12 @@ const updateReviewById = async function (req, res) {
             });
         }
 
-        if (Object.keys(reviewData).length == 0) {
-            return res.status(400).send({
-                status: false,
-                message: "Body can't be empty"
-            })
-        }
+        // if (Object.keys(reviewData).length == 0) {
+        //     return res.status(400).send({
+        //         status: false,
+        //         message: "Body can't be empty"
+        //     })
+        // }
 
         let updateQuery = {}
 

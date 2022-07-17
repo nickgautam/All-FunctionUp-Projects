@@ -157,22 +157,22 @@ const createBook = async function (req, res) {
         }
         data.releasedAt = new Date().toISOString()
 
-        // if(req.files[0]){
+        if(req.files[0]){
 
-        // let files = req.files
+        let files = req.files
 
-        // if (files && files.length > 0) {
-        //     //upload to s3 and get the uploaded link
-        //     // res.send the link back to frontend/postman
-        //     var uploadedFileURL = await aws.uploadFile(files[0])
-        // }
-        // else {
-        //     return res.status(400).send({ msg: "No file found" })
-        // }
+        if (files && files.length > 0) {
+            //upload to s3 and get the uploaded link
+            // res.send the link back to frontend/postman
+            var uploadedFileURL = await aws.uploadFile(files[0])
+        }
+        else {
+            return res.status(400).send({ msg: "No file found" })
+        }
 
-        // }
+        }
 
-        // data.bookCover = uploadedFileURL
+        data.bookCover = uploadedFileURL
 
         await bookModel.create(data)
 
