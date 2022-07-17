@@ -188,13 +188,6 @@ const updateReviewById = async function (req, res) {
             });
         }
 
-        // if (Object.keys(reviewData).length == 0) {
-        //     return res.status(400).send({
-        //         status: false,
-        //         message: "Body can't be empty"
-        //     })
-        // }
-
         let updateQuery = {}
 
         if (reviewedBy) {
