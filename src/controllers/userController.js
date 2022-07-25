@@ -16,11 +16,17 @@ exports.userRegister = async (req, res) => {
         let files = req.files
 
         data = JSON.parse(JSON.stringify(data));
+
+        if (!data.address) return res.status(400).send({ status: false, message: "address is required" })
+        if (typeof data.address!== "object") return res.status(400).send({ status: false, message: "address... is invalid type" })
+
         data.address = JSON.parse(data.address)
-        //data.phone=parseInt(data.phone)
+
+        //data.phone=parseInt(data.phone)   
 
         let { fname, lname, email, profileImage, phone, password, address, ...rest } = data
 
+        
 
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
