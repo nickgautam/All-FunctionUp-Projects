@@ -10,3 +10,4 @@ app.use(bodyParser.urlencoded(),{extended: true})
 const url = "mongodb+srv://NishantGautam:Ng123@cluster0.45vj3.mongodb.net/group41Database"
 
 mongoose.connect(url, {newurlencoded: true})
+.then()
