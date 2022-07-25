@@ -64,8 +64,8 @@ exports.userRegister = async (req, res) => {
         if (files && files.length > 0) var uploadedFileURL = await awsController.uploadFile(files[0])
         data.profileImage = uploadedFileURL
 
-        //const creatUser = await userModel.create(data)
-        return res.status(201).send({ status: true, message: "User Created Successfully", data: data })
+        const creatUser = await userModel.create(data)
+        return res.status(201).send({ status: true, message: "User Created Successfully", data: creatUser })
 
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
