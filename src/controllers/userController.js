@@ -2,7 +2,7 @@ const userModel = require('../models/userModel')
 const { isValid } = require('../validator/validator')
 const awsController = require("../controllers/awsController")
 const bcrypt = require('bcrypt');
-
+const jwt = require("jsonwebtoken")
 
 const saltRounds = 10;
 const validName = /^[a-zA-Z ]{3,20}$/
@@ -76,6 +76,43 @@ exports.userRegister = async (req, res) => {
 }
 
 
+ exports.userLogin = async function(req,res){
+    try{
+        let credentials= req.body
+        if(Object.keys(credentials).length==0) return res.status(400).send({status:false, message:"Please enter email & password"})
+      let {email, password}= credentials
+      if (!email) return res.status(400).send({ status: false, message: "email is required" })
+      if (!validEmail.test(email)) { return res.status(400).send({ status: false, message: `Email is not valid ${email}` }) }
+      if (!password) return res.status(400).send({ status: false, message: "email is required" })
+      if (!validPassword.test(password)) { return res.status(400).send({ status: false, message: `password is not valid ${password}` }) }
+      
+      
+      let user = await userModel.findOne({email:email})
+       if(!user) return res.status(404).send({status:false, message:"User not found"})
+       bcrypt.compare(password, user.password, function(err, result) {
+        if (result) {
+          console.log("It matches!")
+          const token =jwt.sign({
+            userId: user._id,
+            iat: Math.floor(Date.now() / 1000),
+            exp: Math.floor(Date.now() / 1000) + 23 * 60 * 60
+        }, "my@fifth@project@product@management")
+       
+        let final={userId: user._id,token: token }
+        // res.setHeader('Token', token)
+        res.status(200).send({ status: true, message: 'user login successfully', data: final})
+        }
+        else {
+          console.log("Invalid password!");
+        }
+      });
+       
+        
+
+    }catch(err){
+        return res.status(500).send({status:false, message:err.message})
+    }
+ }
 exports.getUserDetails = async (req, res) => {
     const userId = req.params.userId
 
