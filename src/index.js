@@ -3,9 +3,12 @@ const mongoose= require("mongoose")
 const route = require("./routes/route")
 const bodyParser = require("body-parser")
 const app = express()
+const multer =require("multer");
+const aws =require("aws-sdk");
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
+app.use(multer().any())
 
 const url = "mongodb+srv://NishantGautam:Ng123@cluster0.45vj3.mongodb.net/group41Database"
 
