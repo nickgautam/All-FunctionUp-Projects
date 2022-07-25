@@ -10,6 +10,7 @@ exports.userRegister = async (req, res) => {
         let filesData = req.files
         let { fname, lname, email, profileImage, phone, password, address, ...rest } = data
 
+        
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
         if (!fname) return res.status(400).send({ status: false, message: "fname is required" })
@@ -41,10 +42,6 @@ exports.userRegister = async (req, res) => {
         if (!isValid(billing.city)) return res.status(400).send({ status: false, message: "billing city is invalid" })
 
         data.password = bcrypt.hashSync(password, saltRounds)
-console.log(data.password)
-
-
-
 
 
         const creatUser = await userModel.create(data)
