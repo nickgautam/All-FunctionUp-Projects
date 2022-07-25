@@ -2,12 +2,11 @@ const jwt =require('jsonwebtoken')
 
 exports.auth =async (req,res,next)=>{
   try {
-        let token = req.headers ['X-API-KEY'];
+        let token = req.headers.authorization
         if (!token) {
-          token = req.headers ['x-api-key'];
+          return res.status(400).send({ status: false, message: "Token is missing" });
         }
-        if (!token) return res.status(400).send({ status: false, message: "Token is missing" });
-    
+        
         let decodedToken = jwt.verify(token, "group41");
         req.decodedToken = decodedToken.userId;
         next();

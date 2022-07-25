@@ -12,7 +12,7 @@ router.get("/text", function(req, res){
 
 router.post('/register',userRegister)
 
-router.get('/user/:userId/profile',getUserDetails)
+router.get('/user/:userId/profile',auth,getUserDetails)
 
 
 
