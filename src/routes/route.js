@@ -1,6 +1,7 @@
 const express = require("express")
 const router = express.Router()
-const {userRegister}=require('../controllers/userController')
+const {auth} = require("../middleware/auth");
+const {userRegister,getUserDetails}=require('../controllers/userController')
 
 
 
@@ -11,7 +12,7 @@ router.get("/text", function(req, res){
 
 router.post('/register',userRegister)
 
-
+router.get('/user/:userId/profile',getUserDetails)
 
 
 
