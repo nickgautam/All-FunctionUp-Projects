@@ -1,19 +1,22 @@
-const jwt =require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 
-exports.auth =async (req,res,next)=>{
-  try {
-        
+exports.auth = async (req, res, next) => {
+    try {
+        let token = req.headers['authorization'];
         if (!token) return res.status(400).send({ status: false, message: "Token is missing" });
-    
-        let decodedToken = jwt.verify(token, "group41");
-        req.decodedToken = decodedToken.userId;
+        token = token.split(" ")
+        let decodedToken = jwt.verify(token[1], "my@fifth@project@product@management", function (err, data) {
+            if (err) return null
+            else {return data}
+        });
+        if(!decodedToken) return res.status(401).send({ status: false, message: "Token is invalid" });
+        // console.log(decodedToken)
+        req.userId = decodedToken.userId;
         next();
-      } catch (error) { //hardcoded them
-        if (error.message == "jwt expired") return res.status(400).send({ status: false, message: "JWT expired, login again" })
-        if (error.message == "invalid signature") return res.status(401).send({ status: false, message: "Token is incorrect" })
+    } catch (error) { //hardcoded them
         return res.status(500).send({ status: false, error: error.message })
-      }
-    
+    }
 
-    
+
+
 }

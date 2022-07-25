@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-// const {auth} = require("../middleware/auth");
+const {auth} = require("../middleware/auth");
 const {userRegister,userLogin,getUserDetails}=require('../controllers/userController')
 
 
@@ -12,7 +12,7 @@ router.get("/text", function(req, res){
 
 router.post('/register',userRegister)
 router.post('/login',userLogin)
-router.get('/user/:userId/profile',getUserDetails)
+router.get('/user/:userId/profile',auth, getUserDetails)
 
 
 

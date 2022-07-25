@@ -3,6 +3,7 @@ const { isValid } = require('../validator/validator')
 const awsController = require("../controllers/awsController")
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken")
+const mongoose= require("mongoose")
 
 const saltRounds = 10;
 const validName = /^[a-zA-Z ]{3,20}$/
@@ -99,7 +100,6 @@ exports.userRegister = async (req, res) => {
         }, "my@fifth@project@product@management")
        
         let final={userId: user._id,token: token }
-        // res.setHeader('Token', token)
         res.status(200).send({ status: true, message: 'user login successfully', data: final})
         }
         else {
