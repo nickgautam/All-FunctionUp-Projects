@@ -107,7 +107,6 @@ exports.userLogin = async function (req, res) {
         if (!password) return res.status(400).send({ status: false, message: "email is required" })
         if (!validPassword.test(password)) { return res.status(400).send({ status: false, message: `password is not valid ${password}` }) }
 
-
         let user = await userModel.findOne({ email: email })
         if (!user) return res.status(404).send({ status: false, message: "User not found" })
         bcrypt.compare(password, user.password, function (err, result) {
@@ -133,7 +132,6 @@ exports.userLogin = async function (req, res) {
         return res.status(500).send({ status: false, message: err.message })
     }
 }
-
 exports.getUserDetails = async (req, res) => {
     const userId = req.params.userId
 
@@ -153,42 +151,74 @@ exports.getUserDetails = async (req, res) => {
 
 exports.updateUserDetails = async (req, res) => {
     try {
+        let userId = req.params.userId
         let data = req.body
         let files = req.files
         let { fname, lname, email, profileImage, phone, password, address, ...rest } = data
-
+        if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
 
-        if (data.hasOwnProperty("fname")) {
-            if (!validName.test(fname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
-        }
-        if (data.hasOwnProperty("lname")) {
-            if (!validName.test(lname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
-        }
-        if (data.hasOwnProperty("email")) {
-            if (!validEmail.test(email)) return res.status(400).send({ status: false, message: "email is invalid" })
-            let findEmail = await userModel.findOne({ email: email })
-            if (findEmail) return res.status(400).send({ status: false, message: "Email already exist" })
-        }
-        if (data.hasOwnProperty("phone")) {
-            if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "email is invalid" })
-            let findPhone = await userModel.findOne({ phone: phone })
-            if (findPhone) return res.status(400).send({ status: false, message: "Email already exist" })
-        }
-        if (data.hasOwnProperty("password")) {
-            if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
-            data.password = bcrypt.hashSync(password, saltRounds)
-        }
+        const checkUserId = await userModel.findById(userId)
+        if (!checkUserId) return res.status(404).send({ status: false, message: "User not found" })
+
+        if (!validName.test(fname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
+
+
+        if (!validName.test(lname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
+
+
+        if (!validEmail.test(email)) return res.status(400).send({ status: false, message: "email is invalid" })
+        let findEmail = await userModel.findOne({ email: email })
+        if (findEmail) return res.status(400).send({ status: false, message: "Email already exist" })
+
+
+        if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "email is invalid" })
+        let findPhone = await userModel.findOne({ phone: phone })
+        if (findPhone) return res.status(400).send({ status: false, message: "phone number already exist" })
+
+
+        if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
+        data.password = bcrypt.hashSync(password, saltRounds)
+
         if (files.length > 0) {
             mimetype = files[0].mimetype.split("/")
             if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
             if (files && files.length > 0) var uploadedFileURL = await awsController.uploadFile(files[0])
             data.profileImage = uploadedFileURL
+
+            let updateData = {
+                fname: fname,
+                lname: lname,
+                email: email,
+                phone: phone,
+                password: password,
+                profileImage: profileImage,
+
+                address: {
+                    shipping: {
+                        street: address?.shipping?.street,
+                        city: address?.shipping?.city,
+                        pincode: address?.shipping?.pincode
+                    },
+                    billing: {
+                        street: address?.billing?.street,
+                        city: address?.billing?.city,
+                        pincode: address?.billing?.pincode
+                    }
+
+                }
+
+            }
+
+            const updateUser = await userModel.findOneAndUpdate({ _id: userId }, updateData, { new: true })
+            return res.status(200).send({ status: true, message: "User updated successfully", data:updateUser })
+
+
         }
 
 
     } catch (error) {
-
+        return res.status(500).send({ status: false, message: error.message })
     }
 }
