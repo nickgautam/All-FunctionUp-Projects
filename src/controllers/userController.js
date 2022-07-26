@@ -17,7 +17,7 @@ exports.userRegister = async (req, res) => {
     try {
         let data = req.body
         let files = req.files
-       
+
 
         //data = JSON.parse(JSON.stringify(data));
         //data.address = JSON.parse(data.address)
@@ -38,10 +38,10 @@ exports.userRegister = async (req, res) => {
         if (!validEmail.test(email)) return res.status(400).send({ status: false, message: "email is invalid" })
         if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "phone is invalid" })
         if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
-       
+
         address = parseJSONSafely(address)
-        
-        
+
+
         if (!isNaN(address) || !address) return res.status(400).send({ status: false, message: "Address should be in Object Format look like this. {'street':'mg road 32'}" })
         if (!Object.keys(address).length) return res.status(400).send({ status: false, message: "Shipping and Billing Address are Required" })
         let { shipping, billing, ...remaining } = address
@@ -53,7 +53,7 @@ exports.userRegister = async (req, res) => {
         if (typeof shipping !== "object") return res.status(400).send({ status: false, message: "shipping is invalid type" })
         if (!shipping.hasOwnProperty("street")) return res.status(400).send({ status: false, message: "Shipping street is required " })
         if (!shipping.hasOwnProperty("city")) return res.status(400).send({ status: false, message: "Shipping city is required " })
-        if (!shipping.hasOwnProperty("pincode")) return res.status(400).send({ status: false, message: "Shipping pincode is required "})
+        if (!shipping.hasOwnProperty("pincode")) return res.status(400).send({ status: false, message: "Shipping pincode is required " })
 
         if (!isValid(shipping.street)) return res.status(400).send({ status: false, message: " shipping street is invalid " })
         if (!isValid(shipping.city)) return res.status(400).send({ status: false, message: " shipping city is invalid" })
@@ -69,9 +69,9 @@ exports.userRegister = async (req, res) => {
         if (!isValid(billing.street)) return res.status(400).send({ status: false, message: " billing street is invalid " })
         if (!isValid(billing.city)) return res.status(400).send({ status: false, message: "billing city is invalid" })
         if (!/^\d{6}$/.test(billing.pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid" })
-        
+
         data.address = address
-      
+
         let findEmail = await userModel.findOne({ email: email })
         if (findEmail) return res.status(400).send({ status: false, message: "Email already exist" })
 
