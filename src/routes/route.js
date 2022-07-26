@@ -4,16 +4,10 @@ const {auth} = require("../middleware/auth");
 const {userRegister,userLogin,getUserDetails}=require('../controllers/userController')
 
 
-
-
-router.get("/text", function(req, res){
-    res.send({message: "hello"})
-})
-
 router.post('/register',userRegister)
 router.post('/login',userLogin)
 router.get('/user/:userId/profile',auth, getUserDetails)
-
+router.put('/user/:userId/profile',)
 
 
 
