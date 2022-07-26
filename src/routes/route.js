@@ -1,20 +1,13 @@
 const express = require("express")
 const router = express.Router()
 const {auth} = require("../middleware/auth");
-const {userRegister,userLogin,getUserDetails,updateUser}=require('../controllers/userController')
+const {userRegister,userLogin,getUserDetails,updateUserDetails}=require('../controllers/userController')
 
-
-
-
-router.get("/text", function(req, res){
-    res.send({message: "hello"})
-})
 
 router.post('/register',userRegister)
 router.post('/login',userLogin)
 router.get('/user/:userId/profile',auth, getUserDetails)
-router.post('/user/:userId/profile',updateUser)
-
+router.put('/user/:userId/profile',updateUserDetails)
 
 
 
