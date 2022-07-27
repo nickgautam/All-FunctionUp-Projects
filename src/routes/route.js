@@ -6,8 +6,8 @@ const {userRegister,userLogin,getUserDetails,updateUserDetails}=require('../cont
 
 router.post('/register',userRegister)
 router.post('/login',userLogin)
-router.get('/user/:userId/profile',auth, getUserDetails)
-router.put('/user/:userId/profile',updateUserDetails)
+router.get('/user/:userId/profile', auth, getUserDetails)
+router.put('/user/:userId/profile', auth, updateUserDetails)
 
 
 

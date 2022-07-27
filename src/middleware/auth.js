@@ -14,7 +14,7 @@ exports.auth = async (req, res, next) => {
         req.userId = decodedToken.userId;
         next();
     } catch (error) { //hardcoded them
-        return res.status(500).send({ status: false, error: error.message })
+        return res.status(500).send({ status: false, message: error.message })
     }
 
 

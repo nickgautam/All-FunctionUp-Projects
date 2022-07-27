@@ -159,6 +159,9 @@ exports.updateUserDetails = async (req, res) => {
         let files = req.files
         let { fname, lname, email, profileImage, phone, password, address, ...rest } = data
         if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
+        
+        data = JSON.parse(JSON.stringify(data))
+        
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
 
@@ -170,11 +173,11 @@ exports.updateUserDetails = async (req, res) => {
 
         if (!validName.test(lname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
 
-
-        if (!validEmail.test(email)) return res.status(400).send({ status: false, message: "email is invalid" })
+         if(data.hasOwnProperty(email)){
+            if (!validEmail.test(email)) return res.status(400).send({ status: false, message: "email is invalid" })
         let findEmail = await userModel.findOne({ email: email })
         if (findEmail) return res.status(400).send({ status: false, message: "Email already exist" })
-
+        }
 
         if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "email is invalid" })
         let findPhone = await userModel.findOne({ phone: phone })
