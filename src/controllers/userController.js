@@ -1,5 +1,5 @@
 const userModel = require('../models/userModel')
-const { isValid, parseJSONSafely } = require('../validator/validator')
+const { isValid, parseJSONSafely } = require('../validator/validator.js')
 const awsController = require("../controllers/awsController")
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken")
@@ -10,6 +10,8 @@ const validName = /^[a-zA-Z ]{3,20}$/
 const validEmail = /^[a-z0-9]+@[a-z]+\.[a-z]{2,3}/
 const validPhoneNumber = /^[0]?[6789]\d{9}$/
 const validPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/;
+const validPincode = /^[1-9]{1}[0-9]{2}[0-9]{3}$/
+
 
 
 
@@ -39,6 +41,11 @@ exports.userRegister = async (req, res) => {
         if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "phone is invalid" })
         if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
 
+        console.log(address)
+        address = address.split(" ").join("")
+        str = address.match(/:\d+/)[0].substring(1)
+        x = ':"' + str + '"'
+        address = address.replace(/:\d+/, x)
         address = parseJSONSafely(address)
 
 
@@ -57,7 +64,8 @@ exports.userRegister = async (req, res) => {
 
         if (!isValid(shipping.street)) return res.status(400).send({ status: false, message: " shipping street is invalid " })
         if (!isValid(shipping.city)) return res.status(400).send({ status: false, message: " shipping city is invalid" })
-        if (!/^\d{6}$/.test(shipping.pincode)) return res.status(400).send({ status: false, message: " shipping pincode is invalid" })
+        if (!validName.test(shipping.city)) return res.status(400).send({ status: false, message: "Shipping city is invalid" })
+        if (!validPincode.test(shipping.pincode)) return res.status(400).send({ status: false, message: " shipping pincode is invalid" })
 
 
 
@@ -68,7 +76,8 @@ exports.userRegister = async (req, res) => {
 
         if (!isValid(billing.street)) return res.status(400).send({ status: false, message: " billing street is invalid " })
         if (!isValid(billing.city)) return res.status(400).send({ status: false, message: "billing city is invalid" })
-        if (!/^\d{6}$/.test(billing.pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid" })
+        if (!validName.test(billing.city)) return res.status(400).send({ status: false, message: "Shipping city is invalid" })
+        if (!validPincode.test(billing.pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid" })
 
         data.address = address
 
@@ -181,42 +190,79 @@ exports.updateUserDetails = async (req, res) => {
         if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
         data.password = bcrypt.hashSync(password, saltRounds)
 
+        if (fname) {
+            if (!validName.test(fname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
+            finduser.fname = fname
+        }
+        if (lname) {
+            if (!validName.test(lname)) return res.status(400).send({ status: false, message: "lname is Invalid" })
+            finduser.lname = lname
+        }
+        if (data.hasOwnProperty("email")) {
+            if (!validEmail.test(email)) return res.status(400).send({ status: false, message: "email is invalid" })
+            let findEmail = await userModel.findOne({ email: email })
+            if (findEmail) return res.status(400).send({ status: false, message: "Email already exist" })
+            finduser.email = email
+        }
+        if (data.hasOwnProperty("phone")) {
+            if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "Phone Number is invalid" })
+            let findPhone = await userModel.findOne({ phone: phone })
+            if (findPhone) return res.status(400).send({ status: false, message: "Phone Number already exist" })
+            finduser.phone = phone
+        }
+        if (data.hasOwnProperty("password")) {
+            if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
+            finduser.password = bcrypt.hashSync(password, saltRounds)
+        }
         if (files.length > 0) {
             mimetype = files[0].mimetype.split("/")
             if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
             if (files && files.length > 0) var uploadedFileURL = await awsController.uploadFile(files[0])
             data.profileImage = uploadedFileURL
 
-            let updateData = {
-                fname: fname,
-                lname: lname,
-                email: email,
-                phone: phone,
-                password: password,
-                profileImage: profileImage,
+        if (address) {
+            address = address.split(" ").join("")
+            str = address.match(/:\d+/)[0].substring(1)
+            x = ':"' + str + '"'
+            address = address.replace(/:\d+/, x)
+            address = parseJSONSafely(address)
 
-                address: {
-                    shipping: {
-                        street: address?.shipping?.street,
-                        city: address?.shipping?.city,
-                        pincode: address?.shipping?.pincode
-                    },
-                    billing: {
-                        street: address?.billing?.street,
-                        city: address?.billing?.city,
-                        pincode: address?.billing?.pincode
-                    }
 
+            if (!isNaN(address) || !address) return res.status(400).send({ status: false, message: "Address should be in Object Format look like this. {'street':'mg road 32'}" })
+            if (address.shipping) {
+                let { street, city, pincode } = address.shipping;
+
+                if (street) {
+                    if (!isValid(street)) return res.status(400).send({ status: false, message: "Shipping Street is invalid" })
+                    finduser.address.shipping.street = street;
                 }
-
+                if (city) {
+                    if (!validName.test(city)) return res.status(400).send({ status: false, message: "Shipping city is invalid" })
+                    finduser.address.shipping.city = city;
+                }
+                if (pincode) {
+                    if (!validPincode.test(pincode)) return res.status(400).send({ status: false, message: " Shipping pincode is invalid" })
+                    finduser.address.shipping.pincode = pincode;
+                }
             }
 
-            const updateUser = await userModel.findOneAndUpdate({ _id: userId }, updateData, { new: true })
-            return res.status(200).send({ status: true, message: "User updated successfully", data:updateUser })
-
-
+            if (address.billing) {
+                let { street, city, pincode } = address.billing;
+                if (street) {
+                    if (!isValid(street)) return res.status(400).send({ status: false, message: "billing Street is invalid" })
+                    finduser.address.billing.street = street;
+                }
+                if (city) {
+                    if (!validName.test(city)) return res.status(400).send({ status: false, message: "billing city is invalid" })
+                    finduser.address.billing.city = city;
+                }
+                if (pincode) {
+                    if (!validPincode.test(pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid" })
+                    finduser.address.billing.pincode = pincode;
+                }
+            }
         }
-
+    }
 
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
