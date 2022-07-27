@@ -89,18 +89,26 @@ exports.getAllProduct = async (req, res) => {
             if (!isValid(availableSizes)) { return res.status(400).send({ status: false, message: "Plsease provide availableSizes" }) }
             filterData.availableSizes = availableSizes.toUpperCase()
         }
-        if (!validString(priceGreaterThan)) {
-            return res.status(400).send({ status: false, message: "price should be greaterthan" })
-        }
-        if (data.hasOwnProperty("priceLessThan")) {
-            if (!isValid(priceLessThan)) { return res.status(400).send({ status: false, message: "price should be lessthan" }) }
-        }
+         if (data.hasOwnProperty("priceGreaterThan")) {
+        if (!validPrice.test(priceGreaterThan)) return res.status(400).send({ status: false, message: " priceGreaterThan  is invalid " })
+         }
+         if (data.hasOwnProperty("priceLessThan")) {
+            if (!validPrice.test(priceLessThan)) return res.status(400).send({ status: false, message: " priceLessThan  is invalid " })
+             }
+
+  
+  const filterPrice = await productModel.find({isDeleted:false})
+ if(priceGreaterThan<filterPrice.price<priceLessThan){ return res.status(404).send({ status: false, message: "Product not found" })}
         const productDetail = await productModel.find(filterData)
+        //console.log(productDetail)
         if (productDetail.length > 0) {
             return res.status(200).send({ status: true, data: productDetail })
         } else {
             return res.status(404).send({ status: false, message: "Product not found" })
         }
+
+    
+
 
     } catch (error) {
         return res.status(500).send({ status: true, message: error.message })
