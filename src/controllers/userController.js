@@ -88,8 +88,8 @@ exports.userRegister = async (req, res) => {
         if (findPhone) return res.status(400).send({ status: false, message: "Phone Number already exist" })
 
         data.password = bcrypt.hashSync(password, saltRounds)
+       
         if (!files.length) return res.status(400).send({ status: false, message: "Please Provide the Image file" })
-
         mimetype = files[0].mimetype.split("/") //---["image",""]
         if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
         if (files && files.length > 0) var uploadedFileURL = await awsController.uploadFile(files[0])
@@ -113,13 +113,14 @@ exports.userLogin = async function (req, res) {
         let { email, password } = credentials
         if (!email) return res.status(400).send({ status: false, message: "email is required" })
         if (!validEmail.test(email)) { return res.status(400).send({ status: false, message: `Email is not valid ${email}` }) }
-        if (!password) return res.status(400).send({ status: false, message: "email is required" })
+        if (!password) return res.status(400).send({ status: false, message: "password is required" })
         if (!validPassword.test(password)) { return res.status(400).send({ status: false, message: `password is not valid ${password}` }) }
 
 
         let user = await userModel.findOne({ email: email })
         if (!user) return res.status(404).send({ status: false, message: "User not found" })
         bcrypt.compare(password, user.password, function (err, result) {
+        
             if (result) {
                 console.log("It matches!")
                 const token = jwt.sign({
@@ -129,11 +130,13 @@ exports.userLogin = async function (req, res) {
                 }, "my@fifth@project@product@management")
 
                 let final = { userId: user._id, token: token }
-                res.status(200).send({ status: true, message: 'user login successfully', data: final })
+                return res.status(200).send({ status: true, message: 'user login successfully', data: final })
             }
-            else {
+            else{
                 console.log("Invalid password!");
+                return res.status(400).send({ status: false, message: "Invalid password" })
             }
+          
         });
 
 
@@ -150,7 +153,6 @@ exports.getUserDetails = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
         const checkUserId = await userModel.findById(userId)
         if (!checkUserId) return res.status(404).send({ status: false, message: "User not found" })
-
         return res.status(200).send({ status: true, message: "User profile details", data: checkUserId })
     } catch (error) {
 
@@ -172,7 +174,7 @@ exports.updateUserDetails = async (req, res) => {
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
         if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
         let finduser = await userModel.findOne({ _id: userId });
-        if (!finduser) return res.status(404).send({ status: false, message: 'user id does not exist' });
+        if (!finduser) return res.status(404).send({ status: false, message: 'user does not exist' });
 
         if (fname) {
             if (!validName.test(fname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
@@ -256,6 +258,6 @@ exports.updateUserDetails = async (req, res) => {
 
 
     } catch (error) {
-        return res.send(error)
+        return res.status(500).send({status:false, message:error.message})
     }
 }

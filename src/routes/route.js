@@ -7,13 +7,13 @@ const{createProducts,getProducts,getProductsById,UpdateProducts,DeleteProducts}=
 
 router.post('/register',userRegister)
 router.post('/login',userLogin)
-router.get('/user/:userId/profile',auth, getUserDetails)
-router.put('/user/:userId/profile',updateUserDetails)
+router.get('/user/:userId/profile', auth, getUserDetails)
+router.put('/user/:userId/profile', auth, updateUserDetails)
 
 
 //============= Products Routes============================================================================================//
 router.post('/products',createProducts)
-router.get('/products',getProducts)
+router.get('/products',getAllProduct)
 router.get('/products/:productId',getProductsById)
 router.put('/products/:productId',UpdateProducts)
 router.delete('/products/:productId',DeleteProducts)
