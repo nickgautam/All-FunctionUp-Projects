@@ -1,13 +1,16 @@
 const productModel = require('../models/productModel')
 
 
-exports.createProducts =(req,res)=>{
+exports.createProducts =async (req,res)=>{
 try{
 let data= req.body
 let files= req.files
-let {title, description, price, currencyId, currencyFormat, productImage, style, availableSizes, installments, ...rest} =data
+
+//data = JSON.parse(JSON.stringify(data))
+let { title, description, price, currencyId, currencyFormat, productImage, style, availableSizes, installments, ...rest} =data
 if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
-if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
+//if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
+console.log(title)
 if (!title) return res.status(400).send({ status: false, message: "title is required" })
 if (!description) return res.status(400).send({ status: false, message: "description is required" })
 if (!price) return res.status(400).send({ status: false, message: "price is required" })
@@ -30,13 +33,13 @@ if (files && files.length > 0) var uploadedFileURL = await awsController.uploadF
 data.productImage = uploadedFileURL
 
 
-if (["S", "XS","M","X", "L","XXL", "XL"].indexOf(availableSizes) == -1) {
+if (["S","XS","M","X", "L","XXL", "XL"].indexOf(availableSizes) == -1) {
     return res.status(400).send({
         status: false,
         message: " Enter a valid availableSizes S, XS, M, X, L, XXL, XL "
     })
 }
-data[deletedAt] =new Date()
+data["deletedAt"] =new Date()
 let checkTitle= await productModel.findOne({title:title})
 if(checkTitle) return res.status(400).send({status:false, message:"title already exists"})
 
