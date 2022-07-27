@@ -107,6 +107,7 @@ exports.userLogin = async function (req, res) {
         if (!password) return res.status(400).send({ status: false, message: "password is required" })
         if (!validPassword.test(password)) { return res.status(400).send({ status: false, message: `password is not valid ${password}` }) }
 
+
         let user = await userModel.findOne({ email: email })
         if (!user) return res.status(404).send({ status: false, message: "User not found" })
         bcrypt.compare(password, user.password, function (err, result) {
@@ -135,6 +136,7 @@ exports.userLogin = async function (req, res) {
         return res.status(500).send({ status: false, message: err.message })
     }
 }
+
 exports.getUserDetails = async (req, res) => {
     const userId = req.params.userId
 
@@ -154,77 +156,92 @@ exports.getUserDetails = async (req, res) => {
 
 exports.updateUserDetails = async (req, res) => {
     try {
-        let userId = req.params.userId
-        let data = req.body
-        let files = req.files
-        let { fname, lname, email, profileImage, phone, password, address, ...rest } = data
-        if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
-        
-        data = JSON.parse(JSON.stringify(data))
-        
-        if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
+        let userId = req.params.userId;
+        let data = req.body;
+        data = JSON.parse(JSON.stringify(data));
+        let { fname, lname, email, profileImage, phone, password, address, ...rest } = data;
+        let files = req.files;
+
+        if (Object.keys(data).length == 0 && files.length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
+        if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
+        let finduser = await userModel.findOne({ _id: userId });
+        if (!finduser) return res.status(404).send({ status: false, message: 'user does not exist' });
 
-        const checkUserId = await userModel.findById(userId)
-        if (!checkUserId) return res.status(404).send({ status: false, message: "User not found" })
-
-        if (!validName.test(fname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
-
-
-        if (!validName.test(lname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
-
-         if(data.hasOwnProperty(email)){
-            if (!validEmail.test(email)) return res.status(400).send({ status: false, message: "email is invalid" })
-        let findEmail = await userModel.findOne({ email: email })
-        if (findEmail) return res.status(400).send({ status: false, message: "Email already exist" })
+        if (fname) {
+            if (!validName.test(fname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
+            finduser.fname = fname
         }
-
-        if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "email is invalid" })
-        let findPhone = await userModel.findOne({ phone: phone })
-        if (findPhone) return res.status(400).send({ status: false, message: "phone number already exist" })
-
-
-        if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
-        data.password = bcrypt.hashSync(password, saltRounds)
-
+        if (lname) {
+            if (!validName.test(lname)) return res.status(400).send({ status: false, message: "lname is Invalid" })
+            finduser.lname = lname
+        }
+        if (data.hasOwnProperty("email")) {
+            if (!validEmail.test(email)) return res.status(400).send({ status: false, message: "email is invalid" })
+            let findEmail = await userModel.findOne({ email: email })
+            if (findEmail) return res.status(400).send({ status: false, message: "Email already exist" })
+            finduser.email = email
+        }
+        if (data.hasOwnProperty("phone")) {
+            if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "Phone Number is invalid" })
+            let findPhone = await userModel.findOne({ phone: phone })
+            if (findPhone) return res.status(400).send({ status: false, message: "Phone Number already exist" })
+            finduser.phone=phone
+        }
+        if (data.hasOwnProperty("password")) {
+            if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
+            finduser.password = bcrypt.hashSync(password, saltRounds)
+        }
         if (files.length > 0) {
             mimetype = files[0].mimetype.split("/")
             if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
             if (files && files.length > 0) var uploadedFileURL = await awsController.uploadFile(files[0])
-            data.profileImage = uploadedFileURL
+            finduser.profileImage = uploadedFileURL
+        }
 
-            let updateData = {
-                fname: fname,
-                lname: lname,
-                email: email,
-                phone: phone,
-                password: password,
-                profileImage: profileImage,
+        if (address) {
+            address = JSON.parse(address)
+            if (address.shipping) {                 
+                let { street, city, pincode } = address.shipping;
+                if (street) {
 
-                address: {
-                    shipping: {
-                        street: address?.shipping?.street,
-                        city: address?.shipping?.city,
-                        pincode: address?.shipping?.pincode
-                    },
-                    billing: {
-                        street: address?.billing?.street,
-                        city: address?.billing?.city,
-                        pincode: address?.billing?.pincode
-                    }
-
+                    finduser.address.shipping.street = street;
                 }
+                if (city) {
 
+                    finduser.address.shipping.city = city;
+                }
+                if (pincode) {
+
+                    finduser.address.shipping.pincode = pincode;
+                }
             }
 
-            const updateUser = await userModel.findOneAndUpdate({ _id: userId }, updateData, { new: true })
-            return res.status(200).send({ status: true, message: "User updated successfully", data:updateUser })
+            if (address.billing) {                
+                let { street, city, pincode } = address.billing;
+                if (street) {
 
+                    finduser.address.billing.street = street;
+                }
+                if (city) {
 
+                    finduser.address.billing.city = city;
+                }
+                if (pincode) {
+
+                    finduser.address.billing.pincode = pincode;
+                }
+            }
         }
 
 
+        let updateProfile = await userModel.findByIdAndUpdate({ _id: userId }, finduser, { new: true });
+
+        //Send Response
+        res.status(200).send({ status: true, message: "User profile updated", data: updateProfile });
+
+
     } catch (error) {
-        return res.status(500).send({ status: false, message: error.message })
+        return res.status(500).send({status:false, message:error.message})
     }
 }
