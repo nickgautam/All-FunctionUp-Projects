@@ -2,9 +2,11 @@ const productModel = require('../models/productModel')
 const { isValid, parseJSONSafely } = require("../validator/validator")
 const { uploadFile } = require("./awsController")
 
-const validTitle = /^[a-zA-Z ]{3,20}$/
-const validCurrencyId= /^[a-zA-Z ]{3,20}$/
-const validPrice=/\d{1,}(?:[.,]\d{3})*(?:[.,]\d{2})?/
+const validTitle = /^[a-zA-Z0-9 ]{3,20}$/
+const validCurrencyId = /^[a-zA-Z ]{3,20}$/
+const validPrice = /^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$/  ///------- we need to update the regex decimal 2 digits
+
+                   
 
 // const validEmail = /^[a-z0-9]+@[a-z]+\.[a-z]{2,3}/
 // const validPhoneNumber = /^[0]?[6789]\d{9}$/
@@ -12,26 +14,26 @@ const validPrice=/\d{1,}(?:[.,]\d{3})*(?:[.,]\d{2})?/
 
 
 exports.createProducts = async (req, res) => {
-    try {
+   try {
         let data = req.body
         let files = req.files
 
         let { title, description, price, currencyId, currencyFormat, productImage, style, availableSizes, installments, ...rest } = data
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
-      
+
         if (!title) return res.status(400).send({ status: false, message: "title is required" })
         if (!description) return res.status(400).send({ status: false, message: "description is required" })
         if (!price) return res.status(400).send({ status: false, message: "price is required" })
         if (!currencyId) return res.status(400).send({ status: false, message: "currencyId is required" })
         if (!currencyFormat) return res.status(400).send({ status: false, message: "currencyFormat is required" })
 
-        
+
         if (!validTitle.test(title)) return res.status(400).send({ status: false, message: " title is invalid " })
         if (!isValid(description)) return res.status(400).send({ status: false, message: " description  is invalid " })
         if (!isNaN(description)) return res.status(400).send({ status: false, message: "description can't be a number" })
         if (!isValid(price)) return res.status(400).send({ status: false, message: " price  is invalid " })
-        if(validPrice.test(price)) res.status(400).send({ status: false, message: " price  is invalid " })
+        if (!validPrice.test(price)) return res.status(400).send({ status: false, message: " price  is invalid " })
 
         if (!validCurrencyId.test(currencyId)) return res.status(400).send({ status: false, message: " currencyId is invalid " }) ////---->dought USD/INR
         if (!isValid(currencyFormat)) return res.status(400).send({ status: false, message: " currencyFormat  is invalid " })    ///----->currency format
@@ -61,8 +63,10 @@ exports.createProducts = async (req, res) => {
         let product = await productModel.create(data);
         return res.status(201).send({ status: true, message: "Product created successfully", data: product })
 
-    } catch (err) { return res.status(500).send({ status: false, message: err.message }) }
-
+    } 
+    catch (err) {
+        return res.status(500).send({ status: false, message: err.message })
+     }
 
 }
 
@@ -73,18 +77,11 @@ exports.getAllProduct = async (req, res) => {
     try {
         const filterData = { isDeleted: false }
         let data = req.query
-
         let { size, name, priceGreaterThan, priceLessThan } = data
-
-
-
-
-
-
+        
         if (data.hasOwnProperty("name")) {
             if (!isValid(name)) { return res.status(400).send({ status: false, message: "Plsease provide name" }) }
         }
-
 
         if (data.hasOwnProperty("size")) {
             if (!isValid(size)) { return res.status(400).send({ status: false, message: "Plsease provide size" }) }
