@@ -79,8 +79,8 @@ exports.userRegister = async (req, res) => {
         if (findPhone) return res.status(400).send({ status: false, message: "Phone Number already exist" })
 
         data.password = bcrypt.hashSync(password, saltRounds)
+       
         if (!files.length) return res.status(400).send({ status: false, message: "Please Provide the Image file" })
-
         mimetype = files[0].mimetype.split("/") //---["image",""]
         if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
         if (files && files.length > 0) var uploadedFileURL = await awsController.uploadFile(files[0])
