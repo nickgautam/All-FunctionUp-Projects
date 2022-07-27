@@ -79,21 +79,15 @@ exports.getAllProduct = async (req, res) => {
         let data = req.query
         let { size, name, priceGreaterThan, priceLessThan } = data
 
-
-
         if (!validString(name)) { return res.status(400).send({ status: false, message: 'Please provide name ' }) }
-
-
 
         if (data.hasOwnProperty("size")) {
             if (!isValid(size)) { return res.status(400).send({ status: false, message: "Please provide size" }) }
             filterData.availableSizes = size.toUpperCase()
-
         }
         if (data.hasOwnProperty("availableSizes")) {
-        if (!isValid(availableSizes)) { return res.status(400).send({ status: false, message: "Plsease provide availableSizes" }) }
+            if (!isValid(availableSizes)) { return res.status(400).send({ status: false, message: "Plsease provide availableSizes" }) }
             filterData.availableSizes = availableSizes.toUpperCase()
-
         }
         if (!validString(priceGreaterThan)) {
             return res.status(400).send({ status: false, message: "price should be greaterthan" })
@@ -101,18 +95,12 @@ exports.getAllProduct = async (req, res) => {
         if (data.hasOwnProperty("priceLessThan")) {
             if (!isValid(priceLessThan)) { return res.status(400).send({ status: false, message: "price should be lessthan" }) }
         }
-
-
-
         const productDetail = await productModel.find(filterData)
         if (productDetail.length > 0) {
             return res.status(200).send({ status: true, data: productDetail })
         } else {
             return res.status(404).send({ status: false, message: "Product not found" })
         }
-
-
-
 
     } catch (error) {
         return res.status(500).send({ status: true, message: error.message })
