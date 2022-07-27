@@ -2,7 +2,7 @@ const express = require("express")
 const router = express.Router()
 const {auth} = require("../middleware/auth");
 const {userRegister,userLogin,getUserDetails,updateUserDetails}=require('../controllers/userController')
-const{createProducts,getProducts,getProductsById,UpdateProducts,DeleteProducts}=require('../controllers/productController')
+const{createProducts,getAllProduct,getProductsById,UpdateProducts,DeleteProducts}=require('../controllers/productController')
 
 
 router.post('/register',userRegister)

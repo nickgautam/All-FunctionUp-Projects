@@ -141,7 +141,6 @@ exports.getUserDetails = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
         const checkUserId = await userModel.findById(userId)
         if (!checkUserId) return res.status(404).send({ status: false, message: "User not found" })
-
         return res.status(200).send({ status: true, message: "User profile details", data: checkUserId })
     } catch (error) {
 
