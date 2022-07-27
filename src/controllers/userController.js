@@ -1,5 +1,5 @@
 const userModel = require('../models/userModel')
-const { isValid, parseJSONSafely } = require('../validator/validator')
+const { isValid, parseJSONSafely } = require('../validator/validator.js')
 const awsController = require("../controllers/awsController")
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken")
@@ -10,6 +10,8 @@ const validName = /^[a-zA-Z ]{3,20}$/
 const validEmail = /^[a-z0-9]+@[a-z]+\.[a-z]{2,3}/
 const validPhoneNumber = /^[0]?[6789]\d{9}$/
 const validPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/;
+const validPincode = /^[1-9]{1}[0-9]{2}[0-9]{3}$/
+
 
 
 
@@ -39,6 +41,11 @@ exports.userRegister = async (req, res) => {
         if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "phone is invalid" })
         if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
 
+        console.log(address)
+        address = address.split(" ").join("")
+        str = address.match(/:\d+/)[0].substring(1)
+        x = ':"' + str + '"'
+        address = address.replace(/:\d+/, x)
         address = parseJSONSafely(address)
 
 
@@ -57,7 +64,8 @@ exports.userRegister = async (req, res) => {
 
         if (!isValid(shipping.street)) return res.status(400).send({ status: false, message: " shipping street is invalid " })
         if (!isValid(shipping.city)) return res.status(400).send({ status: false, message: " shipping city is invalid" })
-        if (!/^\d{6}$/.test(shipping.pincode)) return res.status(400).send({ status: false, message: " shipping pincode is invalid" })
+        if (!validName.test(shipping.city)) return res.status(400).send({ status: false, message: "Shipping city is invalid" })
+        if (!validPincode.test(shipping.pincode)) return res.status(400).send({ status: false, message: " shipping pincode is invalid" })
 
 
 
@@ -68,7 +76,8 @@ exports.userRegister = async (req, res) => {
 
         if (!isValid(billing.street)) return res.status(400).send({ status: false, message: " billing street is invalid " })
         if (!isValid(billing.city)) return res.status(400).send({ status: false, message: "billing city is invalid" })
-        if (!/^\d{6}$/.test(billing.pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid" })
+        if (!validName.test(billing.city)) return res.status(400).send({ status: false, message: "Shipping city is invalid" })
+        if (!validPincode.test(billing.pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid" })
 
         data.address = address
 
@@ -183,7 +192,7 @@ exports.updateUserDetails = async (req, res) => {
             if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "Phone Number is invalid" })
             let findPhone = await userModel.findOne({ phone: phone })
             if (findPhone) return res.status(400).send({ status: false, message: "Phone Number already exist" })
-            finduser.phone=phone
+            finduser.phone = phone
         }
         if (data.hasOwnProperty("password")) {
             if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
@@ -197,35 +206,43 @@ exports.updateUserDetails = async (req, res) => {
         }
 
         if (address) {
-            address = JSON.parse(address)
-            if (address.shipping) {                 
-                let { street, city, pincode } = address.shipping;
-                if (street) {
+            address = address.split(" ").join("")
+            str = address.match(/:\d+/)[0].substring(1)
+            x = ':"' + str + '"'
+            address = address.replace(/:\d+/, x)
+            address = parseJSONSafely(address)
 
+
+            if (!isNaN(address) || !address) return res.status(400).send({ status: false, message: "Address should be in Object Format look like this. {'street':'mg road 32'}" })
+            if (address.shipping) {
+                let { street, city, pincode } = address.shipping;
+
+                if (street) {
+                    if (!isValid(street)) return res.status(400).send({ status: false, message: "Shipping Street is invalid" })
                     finduser.address.shipping.street = street;
                 }
                 if (city) {
-
+                    if (!validName.test(city)) return res.status(400).send({ status: false, message: "Shipping city is invalid" })
                     finduser.address.shipping.city = city;
                 }
                 if (pincode) {
-
+                    if (!validPincode.test(pincode)) return res.status(400).send({ status: false, message: " Shipping pincode is invalid" })
                     finduser.address.shipping.pincode = pincode;
                 }
             }
 
-            if (address.billing) {                
+            if (address.billing) {
                 let { street, city, pincode } = address.billing;
                 if (street) {
-
+                    if (!isValid(street)) return res.status(400).send({ status: false, message: "billing Street is invalid" })
                     finduser.address.billing.street = street;
                 }
                 if (city) {
-
+                    if (!validName.test(city)) return res.status(400).send({ status: false, message: "billing city is invalid" })
                     finduser.address.billing.city = city;
                 }
                 if (pincode) {
-
+                    if (!validPincode.test(pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid" })
                     finduser.address.billing.pincode = pincode;
                 }
             }
