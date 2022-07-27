@@ -79,42 +79,41 @@ exports.getAllProduct = async (req, res) => {
         let data = req.query
         let { size, name, priceGreaterThan, priceLessThan } = data
 
-        if (data.hasOwnProperty("name")) {
-            if (!validTitle.test(name)) { return res.status(400).send({ status: false, message: "Please provide valid name" }) }
-            filterData.title = name.toUpperCase()
-        }
 
-        if (data.hasOwnProperty("title")) {
-            if (!validTitle.test(title)) { return res.status(400).send({ status: false, message: "Please provide valid title" }) }
-            filterData.title = title.toUpperCase()
-        }
+
+        if (!validString(name)) { return res.status(400).send({ status: false, message: 'Please provide name ' }) }
+
+
+
         if (data.hasOwnProperty("size")) {
             if (!isValid(size)) { return res.status(400).send({ status: false, message: "Please provide size" }) }
             filterData.availableSizes = size.toUpperCase()
-        }
 
+        }
         if (data.hasOwnProperty("availableSizes")) {
-            if (!isValid(availableSizes)) { return res.status(400).send({ status: false, message: "Please provide availableSizes" }) }
+        if (!isValid(availableSizes)) { return res.status(400).send({ status: false, message: "Plsease provide availableSizes" }) }
             filterData.availableSizes = availableSizes.toUpperCase()
 
         }
-        if (!validString(priceGreaterThan)) {
-            return res.status(400).send({ status: false, message: "price should be greaterthan" })
-        }
-        if (data.hasOwnProperty("priceLessThan")) {
-            if (!isValid(priceLessThan)) { return res.status(400).send({ status: false, message: "price should be lessthan" }) }
-        }
+         if (data.hasOwnProperty("priceGreaterThan")) {
+        if (!validPrice.test(priceGreaterThan)) return res.status(400).send({ status: false, message: " priceGreaterThan  is invalid " })
+         }
+         if (data.hasOwnProperty("priceLessThan")) {
+            if (!validPrice.test(priceLessThan)) return res.status(400).send({ status: false, message: " priceLessThan  is invalid " })
+             }
 
-
-
+  
+  const filterPrice = await productModel.find({isDeleted:false})
+ if(priceGreaterThan<filterPrice.price<priceLessThan){ return res.status(404).send({ status: false, message: "Product not found" })}
         const productDetail = await productModel.find(filterData)
+        //console.log(productDetail)
         if (productDetail.length > 0) {
             return res.status(200).send({ status: true, data: productDetail })
         } else {
             return res.status(404).send({ status: false, message: "Product not found" })
         }
 
-
+    
 
 
     } catch (error) {
