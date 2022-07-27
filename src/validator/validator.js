@@ -12,3 +12,7 @@ exports.parseJSONSafely=(str)=> {
     }
 }
 
+exports.validString=(value)=>{
+    if (typeof value === "string" && value.trim().length === 0) return false;
+    return true
+}
