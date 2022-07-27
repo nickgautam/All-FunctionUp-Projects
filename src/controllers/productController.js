@@ -79,19 +79,22 @@ exports.getAllProduct = async (req, res) => {
         let data = req.query
         let { size, name, priceGreaterThan, priceLessThan } = data
 
+        if (data.hasOwnProperty("name")) {
+            if (!validTitle.test(name)) { return res.status(400).send({ status: false, message: "Please provide valid name" }) }
+            filterData.title = name.toUpperCase()
+        }
 
-
-        if (!validString(name)) { return res.status(400).send({ status: false, message: 'Please provide name ' }) }
-
-
-
+        if (data.hasOwnProperty("title")) {
+            if (!validTitle.test(title)) { return res.status(400).send({ status: false, message: "Please provide valid title" }) }
+            filterData.title = title.toUpperCase()
+        }
         if (data.hasOwnProperty("size")) {
             if (!isValid(size)) { return res.status(400).send({ status: false, message: "Please provide size" }) }
             filterData.availableSizes = size.toUpperCase()
-
         }
+
         if (data.hasOwnProperty("availableSizes")) {
-        if (!isValid(availableSizes)) { return res.status(400).send({ status: false, message: "Plsease provide availableSizes" }) }
+            if (!isValid(availableSizes)) { return res.status(400).send({ status: false, message: "Please provide availableSizes" }) }
             filterData.availableSizes = availableSizes.toUpperCase()
 
         }
