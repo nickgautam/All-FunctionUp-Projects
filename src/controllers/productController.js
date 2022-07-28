@@ -134,9 +134,11 @@ exports.UpdateProducts = async (req, res) => {
         let files = req.files
         let productId = req.params.productId
 
+        console.log(req.body,req.files)
 
         data = JSON.parse(JSON.stringify(data));
-        console.log(data, files)
+        
+        console.log(data,files)
 
         if (!validObjectId.isValid(productId)) return res.status(400).send({ status: false, message: "Product id not valid" })
         let { title, description, price, currencyId, currencyFormat, productImage, style, availableSizes, installments, ...rest } = data
@@ -197,8 +199,8 @@ exports.UpdateProducts = async (req, res) => {
             findProduct.installments = installments
         }
 
-        if (files.length > 0) {
-            //if (files.length == 0) return res.status(400).send({ status: false, message: " please insert the Product Image" })
+        if (data.hasOwnProperty("productImage")) return res.status(400).send({ status: false, message: " please insert the Product Image" })
+        if (files.length && files) {
             mimetype = files[0].mimetype.split("/") //---["image",""]
             if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
             if (files && files.length > 0) var uploadedFileURL = await uploadFile(files[0])
@@ -221,11 +223,9 @@ exports.UpdateProducts = async (req, res) => {
 
 exports.DeleteProducts = async (req, res) => {
     try {
-
         const productId = req.params.productId
 
         if (!validObjectId.isValid(productId)) return res.status(400).send({ status: false, message: "Product id not valid" })
-
         const productDetail = await productModel.findOne({ _id: productId })
         if (!productDetail) return res.status(404).send({ status: false, message: "product not found" })
 
