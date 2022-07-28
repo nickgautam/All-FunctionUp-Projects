@@ -112,14 +112,17 @@ exports.userLogin = async function (req, res) {
         if (Object.keys(credentials).length == 0) return res.status(400).send({ status: false, message: "Please enter email & password" })
         let { email, password } = credentials
         if (!email) return res.status(400).send({ status: false, message: "email is required" })
+        if (!password) return res.status(400).send({ status: false, message: "password is required" })
         if (!validEmail.test(email)) { return res.status(400).send({ status: false, message: `Email is not valid ${email}` }) }
         if (!password) return res.status(400).send({ status: false, message: "email is required" })
         if (!validPassword.test(password)) { return res.status(400).send({ status: false, message: `password is not valid ${password}` }) }
 
         let user = await userModel.findOne({ email: email })
         if (!user) return res.status(404).send({ status: false, message: "User not found" })
-        bcrypt.compare(password, user.password, function (err, result) {
-            if (result) {
+      let checkPass=  bcrypt.compare(password, user.password) 
+       if(!checkPass)  return res.status(401).send({ status: false, message: "login faild found" })
+      //, function (err, result) {
+         //   if (result) {
                 console.log("It matches!")
                 const token = jwt.sign({
                     userId: user._id,
@@ -127,13 +130,13 @@ exports.userLogin = async function (req, res) {
                     exp: Math.floor(Date.now() / 1000) + 23 * 60 * 60
                 }, "my@fifth@project@product@management")
 
-                let final = { userId: user._id, token: token }
-                res.status(200).send({ status: true, message: 'user login successfully', data: final })
-            }
-            else {
-                console.log("Invalid password!");
-            }
-        });
+               // let final = { userId: user._id, token: token }
+               res.status(200).send({ status: true, message: 'user login successfully', data: final })
+        //    }
+            // else {
+            //     console.log("Invalid password!");
+            // }
+        
 
 
 
