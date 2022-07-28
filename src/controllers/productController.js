@@ -6,8 +6,6 @@ const validTitle = /^[a-zA-Z0-9 ]{3,20}$/
 const validCurrencyId = /^[a-zA-Z ]{3,20}$/
 const validPrice = /^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$/  ///------- we need to update the regex decimal 2 digits
 
-
-
 // const validEmail = /^[a-z0-9]+@[a-z]+\.[a-z]{2,3}/
 // const validPhoneNumber = /^[0]?[6789]\d{9}$/
 // const validPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*#?&]{8,15}$/;
@@ -32,11 +30,13 @@ exports.createProducts = async (req, res) => {
         if (!validTitle.test(title)) return res.status(400).send({ status: false, message: " title is invalid " })
         if (!isValid(description)) return res.status(400).send({ status: false, message: " description  is invalid " })
         if (!isNaN(description)) return res.status(400).send({ status: false, message: "description can't be a number" })
-        if (!isValid(price)) return res.status(400).send({ status: false, message: " price  is invalid " })
-        if (!validPrice.test(price)) return res.status(400).send({ status: false, message: " price  is invalid " })
+       
+        if (!validPrice.test(price)) return res.status(400).send({ status: false, message: "price is invalid " })
 
-        if (!validCurrencyId.test(currencyId)) return res.status(400).send({ status: false, message: " currencyId is invalid " }) ////---->dought USD/INR
-        if (!isValid(currencyFormat)) return res.status(400).send({ status: false, message: " currencyFormat  is invalid " })    ///----->currency format
+        if (currencyId!=="INR") return res.status(400).send({ status: false, message: "currencyId is invalid " })
+        if (currencyFormat.trim()!=="₹") return res.status(400).send({ status: false, message: "currencyFormat is invalid " })
+
+        
 
         if (typeof style === "string" && style.trim().length === 0) return res.status(400).send({ status: false, message: " style is invalid " })
         if (installments) {
@@ -50,15 +50,23 @@ exports.createProducts = async (req, res) => {
         data.productImage = uploadedFileURL
 
 
-        if (["S", "XS", "M", "X", "L", "XXL", "XL"].indexOf(availableSizes) == -1) {
-            return res.status(400).send({
-                status: false,
-                message: " Enter a valid availableSizes S, XS, M, X, L, XXL, XL "
-            })
+        availableSizes=availableSizes.split(",");
+        data.availableSizes=availableSizes
+        console.log(availableSizes)
+        for(i of availableSizes){
+            if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(i)) {
+                return res.status(400).send({
+                    status: false,
+                    message: " Enter a valid availableSizes S, XS, M, X, L, XXL, XL "
+                })
+            }
         }
+
 
         let checkTitle = await productModel.findOne({ title: title })
         if (checkTitle) return res.status(400).send({ status: false, message: "title already exists" })
+
+        console.log(data)
 
         let product = await productModel.create(data);
         return res.status(201).send({ status: true, message: "Product created successfully", data: product })
@@ -73,7 +81,6 @@ exports.createProducts = async (req, res) => {
 
 
 exports.getAllProduct = async (req, res) => {
-
     try {
         const filterData = { isDeleted: false }
         let data = req.query
@@ -89,26 +96,22 @@ exports.getAllProduct = async (req, res) => {
             if (!isValid(availableSizes)) { return res.status(400).send({ status: false, message: "Plsease provide availableSizes" }) }
             filterData.availableSizes = availableSizes.toUpperCase()
         }
-         if (data.hasOwnProperty("priceGreaterThan")) {
-        if (!validPrice.test(priceGreaterThan)) return res.status(400).send({ status: false, message: " priceGreaterThan  is invalid " })
-         }
-         if (data.hasOwnProperty("priceLessThan")) {
+        if (data.hasOwnProperty("priceGreaterThan")) {
+            if (!validPrice.test(priceGreaterThan)) return res.status(400).send({ status: false, message: " priceGreaterThan  is invalid " })
+        }
+        if (data.hasOwnProperty("priceLessThan")) {
             if (!validPrice.test(priceLessThan)) return res.status(400).send({ status: false, message: " priceLessThan  is invalid " })
-             }
+        }
 
-  
-  const filterPrice = await productModel.find({isDeleted:false})
- if(priceGreaterThan<filterPrice.price<priceLessThan){ return res.status(404).send({ status: false, message: "Product not found" })}
+        const filterPrice = await productModel.find({ isDeleted: false })
+        if (priceGreaterThan < filterPrice.price < priceLessThan) { return res.status(404).send({ status: false, message: "Product not found" }) }
         const productDetail = await productModel.find(filterData)
-        //console.log(productDetail)
+        
         if (productDetail.length > 0) {
             return res.status(200).send({ status: true, data: productDetail })
         } else {
             return res.status(404).send({ status: false, message: "Product not found" })
         }
-
-    
-
 
     } catch (error) {
         return res.status(500).send({ status: true, message: error.message })
