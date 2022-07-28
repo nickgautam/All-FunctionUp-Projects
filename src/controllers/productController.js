@@ -14,6 +14,8 @@ exports.createProducts = async (req, res) => {
         let data = req.body
         let files = req.files
 
+        data = JSON.parse(JSON.stringify(data));
+
         let { title, description, price, currencyId, currencyFormat, productImage, style, availableSizes, installments, ...rest } = data
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
@@ -42,8 +44,9 @@ exports.createProducts = async (req, res) => {
         if (files && files.length > 0) var uploadedFileURL = await uploadFile(files[0])
         data.productImage = uploadedFileURL
 
-
-        availableSizes = availableSizes.toUpperCase().split(",");
+if(data.hasOwnProperty("availableSizes")) {
+    if (!isValid(availableSizes)) return res.status(400).send({ status: false, message: "Style is invalid" })
+            availableSizes = availableSizes.toUpperCase().split(",");
         data.availableSizes = availableSizes
         for (i of availableSizes) {
             if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(i)) {
@@ -53,6 +56,7 @@ exports.createProducts = async (req, res) => {
                 })
             }
         }
+    }
 
 
         let checkTitle = await productModel.findOne({ title: title })
@@ -166,8 +170,8 @@ exports.UpdateProducts = async (req, res) => {
             if (currencyFormat.trim() !== "₹") return res.status(400).send({ status: false, message: "currencyFormat is invalid " })
             findProduct.currencyFormat = currencyFormat
         }
-        if (style) {
-            if (!validString(style)) return res.status(400).send({ status: false, message: "Style is invalid" })
+        if (data.hasOwnProperty("style")) {
+            if (!validString(style)) return res.status(400).send({ status: false, message: "Please enter the style" })
             findProduct.style = style
         }
         if (availableSizes) {
