@@ -190,27 +190,14 @@ exports.UpdateProducts = async (req, res) => {
         }
 
 
-    //     findProduct.productImage=data
-   
-    //  if(!productImage)return res.status(400).send({ status: false, message: " please insert the Product Image" })
-    //  else {
-    //     if (productImage.length>=0) {//return res.status(400).send({ status: false, message: " please insert the Product Image" })
-    //         mimetype = files[0].mimetype.split("/") //---["image",""]
-    //         if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
-    //         if (files && files.length > 0) var uploadedFileURL = await uploadFile(files[0])
-    //         findProduct.productImage = uploadedFileURL
-    //      }
-       
-
-    //  }
-    if  (files.length==0) {
+    if  (files.length>0) {
         return res.status(400).send({ status: false, message: " please insert the Product Image" })
      }
-    if(files.length && files){
+    if(files.length >0){
 
       
-           mimetype = files[0].mimetype.split("/") //---["image",""]
-           if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
+         //  mimetype = files[0].mimetype.split("/") //---["image",""]
+         //  if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
            var uploadedFileURL = await uploadFile(files[0])
             findProduct.productImage = uploadedFileURL
     }
