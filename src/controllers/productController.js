@@ -41,7 +41,7 @@ exports.createProducts = async (req, res) => {
         data.productImage = uploadedFileURL
 
 
-        availableSizes = availableSizes.split(",");
+        availableSizes = availableSizes.toUpperCase().split(",");
         data.availableSizes = availableSizes
 
         for (i of availableSizes) {
@@ -67,8 +67,6 @@ exports.createProducts = async (req, res) => {
 
 }
 
-
-
 exports.getAllProduct = async (req, res) => {
     try {
         const filterData = { isDeleted: false }
@@ -78,25 +76,27 @@ exports.getAllProduct = async (req, res) => {
 
         if (data.hasOwnProperty("size")) {
             if (!isValid(size)) { return res.status(400).send({ status: false, message: "Please provide size" }) }
-            filterData.availableSizes = size.toUpperCase().split(",")
+            filterData.availableSizes = { $in: size.toUpperCase().split(",") }
         }
         if (data.hasOwnProperty("name")) {
             if (!validString(name)) { return res.status(400).send({ status: false, message: 'Please provide name ' }) }
-            filterData.title = name
+            filterData.title = { $regex: `${name.toLowerCase()}` }
         }
         if (data.hasOwnProperty("priceGreaterThan")) {
-            if (!validPrice.test(priceGreaterThan)) return res.status(400).send({ status: false, message: " priceGreaterThan  is invalid " })
+            if (isNaN(priceGreaterThan)) return res.status(400).send({ status: false, message: "priceGreaterThan must be a number " })
+            filterData.price = { $gt: priceGreaterThan }
         }
         if (data.hasOwnProperty("priceLessThan")) {
-            if (!validPrice.test(priceLessThan)) return res.status(400).send({ status: false, message: " priceLessThan  is invalid " })
+            if (isNaN(priceLessThan)) return res.status(400).send({ status: false, message: "priceLessThan must be a number" })
+            filterData.price = { $lt: priceLessThan }
+        }
+        if (data.hasOwnProperty("priceGreaterThan") && data.hasOwnProperty("priceLessThan")) {
+            filterData.price = { $gt: priceGreaterThan, $lt: priceLessThan }
         }
 
-
-        const productDetail = await productModel.find(filterData)
+        const productDetail = await productModel.find(filterData).sort({price:1})
         if (!productDetail.length) return res.status(404).send({ status: false, message: "Product not found" });
-
         return res.status(200).send({ status: true, data: productDetail })
-
 
     } catch (error) {
         return res.status(500).send({ status: true, message: error.message })
