@@ -20,7 +20,6 @@ exports.userRegister = async (req, res) => {
         let data = req.body
         let files = req.files
 
-
         //data = JSON.parse(JSON.stringify(data));
         //data.address = JSON.parse(data.address)
 
@@ -41,7 +40,7 @@ exports.userRegister = async (req, res) => {
         if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "phone is invalid" })
         if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
 
-        console.log(address)
+
         address = address.split(" ").join("")
         str = address.match(/:\d+/)[0].substring(1)
         x = ':"' + str + '"'
@@ -119,10 +118,10 @@ exports.userLogin = async function (req, res) {
 
         let user = await userModel.findOne({ email: email })
         if (!user) return res.status(404).send({ status: false, message: "User not found" })
-      let checkPass=  bcrypt.compare(password, user.password) 
-       if(!checkPass)  return res.status(401).send({ status: false, message: "login faild found" })
-      //, function (err, result) {
-         //   if (result) {
+
+        bcrypt.compare(password, user.password, function (err, result) {
+
+            if (result) {
                 console.log("It matches!")
                 const token = jwt.sign({
                     userId: user._id,
@@ -130,13 +129,11 @@ exports.userLogin = async function (req, res) {
                     exp: Math.floor(Date.now() / 1000) + 23 * 60 * 60
                 }, "my@fifth@project@product@management")
 
-               // let final = { userId: user._id, token: token }
-               res.status(200).send({ status: true, message: 'user login successfully', data: final })
-        //    }
-            // else {
-            //     console.log("Invalid password!");
-            // }
-        
+                let final = { userId: user._id, token: token }
+                return res.status(200).send({ status: true, message: 'user login successfully', data: final })
+            }
+            return res.status(400).send({ status: false, message: "Invalid credentials" })
+        });
 
 
 
@@ -165,33 +162,17 @@ exports.updateUserDetails = async (req, res) => {
     try {
         let userId = req.params.userId
         let data = req.body
+        data = JSON.parse(JSON.stringify(data));
         let files = req.files
         let { fname, lname, email, profileImage, phone, password, address, ...rest } = data
+
         if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
 
-        const checkUserId = await userModel.findById(userId)
-        if (!checkUserId) return res.status(404).send({ status: false, message: "User not found" })
+        const finduser = await userModel.findById(userId)
+        if (!finduser) return res.status(404).send({ status: false, message: "User not found" })
 
-        if (!validName.test(fname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
-
-
-        if (!validName.test(lname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
-
-
-        if (!validEmail.test(email)) return res.status(400).send({ status: false, message: "email is invalid" })
-        let findEmail = await userModel.findOne({ email: email })
-        if (findEmail) return res.status(400).send({ status: false, message: "Email already exist" })
-
-
-        if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "email is invalid" })
-        let findPhone = await userModel.findOne({ phone: phone })
-        if (findPhone) return res.status(400).send({ status: false, message: "phone number already exist" })
-
-
-        if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
-        data.password = bcrypt.hashSync(password, saltRounds)
 
         if (fname) {
             if (!validName.test(fname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
@@ -221,17 +202,18 @@ exports.updateUserDetails = async (req, res) => {
             mimetype = files[0].mimetype.split("/")
             if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
             if (files && files.length > 0) var uploadedFileURL = await awsController.uploadFile(files[0])
-            data.profileImage = uploadedFileURL
+            finduser.profileImage = uploadedFileURL
+        }
 
         if (address) {
-            address = address.split(" ").join("")
-            str = address.match(/:\d+/)[0].substring(1)
-            x = ':"' + str + '"'
-            address = address.replace(/:\d+/, x)
+            if (address.match(/:\d+/) || address.match(/:\s+\d+/g)) {
+                address = address.split(" ").join("")
+                str = address.match(/:\d+/)[0].substring(1)
+                x = ':"' + str + '"'
+                address = address.replace(/:\d+/, x)
+            }
             address = parseJSONSafely(address)
-
-
-            if (!isNaN(address) || !address) return res.status(400).send({ status: false, message: "Address should be in Object Format look like this. {'street':'mg road 32'}" })
+            if (!isNaN(address) || !address) return res.status(400).send({ status: false, message: "Address should be in JSON Object Format look like this. {'street':'mg road 32'}" })
             if (address.shipping) {
                 let { street, city, pincode } = address.shipping;
 
@@ -265,7 +247,9 @@ exports.updateUserDetails = async (req, res) => {
                 }
             }
         }
-    }
+
+        let updateProfile = await userModel.findByIdAndUpdate({ _id: userId }, finduser, { new: true });
+        res.status(200).send({ status: true, message: "User profile updated", data: updateProfile });
 
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
