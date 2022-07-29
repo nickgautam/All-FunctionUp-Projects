@@ -26,10 +26,12 @@ exports.createProducts = async (req, res) => {
         if (!currencyFormat) return res.status(400).send({ status: false, message: "currencyFormat is required" })
 
 
+
         if (!validTitle.test(title)) return res.status(400).send({ status: false, message: " title is invalid " })
         if (!isValid(description.trim())) return res.status(400).send({ status: false, message: " description  is invalid " })
         if (!isNaN(description.trim())) return res.status(400).send({ status: false, message: "description can't be a number" })
         if (!validPrice.test(price.trim())) return res.status(400).send({ status: false, message: "price is invalid " })
+       
         if (currencyId.trim() !== "INR") return res.status(400).send({ status: false, message: "currencyId is invalid " })
         if (currencyFormat.trim() !== "₹") return res.status(400).send({ status: false, message: "currencyFormat is invalid " })
         if (!validString(style)) return res.status(400).send({ status: false, message: "Style is invalid" })
@@ -84,7 +86,7 @@ exports.getAllProduct = async (req, res) => {
         }
         if (data.hasOwnProperty("name")) {
             if (!validString(name)) { return res.status(400).send({ status: false, message: 'Please provide name ' }) }
-            filterData.title = { $regex: `${name.toLowerCase()}` } 
+            filterData.title = { $regex: `${name.toLowerCase()}` }
         }
         if (data.hasOwnProperty("priceGreaterThan")) {
             if (isNaN(priceGreaterThan)) return res.status(400).send({ status: false, message: "priceGreaterThan must be a number " })
@@ -238,4 +240,5 @@ exports.DeleteProducts = async (req, res) => {
 
 
 }
+
 
