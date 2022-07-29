@@ -13,6 +13,7 @@ exports.createProducts = async (req, res) => {
     try {
         let data = req.body
         let files = req.files
+        data = JSON.parse(JSON.stringify(data));
 
         let { title, description, price, currencyId, currencyFormat, productImage, style, availableSizes, installments, ...rest } = data
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
@@ -36,23 +37,25 @@ exports.createProducts = async (req, res) => {
             if (isNaN(installments)) return res.status(400).send({ status: false, message: "installments should be a number" })
         }
 
+
+        if (data.hasOwnProperty("availableSizes")) {
+            availableSizes = availableSizes.toUpperCase().split(",");
+            data.availableSizes = availableSizes
+            for (i of availableSizes) {
+                if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(i)) {
+                    return res.status(400).send({
+                        status: false,
+                        message: " Enter a valid availableSizes S, XS, M, X, L, XXL, XL "
+                    })
+                }
+            }
+        }
+
         if (!files.length) return res.status(400).send({ status: false, message: "Please Provide the Image of the Product" })
         mimetype = files[0].mimetype.split("/") //---["image",""]
         if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
         if (files && files.length > 0) var uploadedFileURL = await uploadFile(files[0])
         data.productImage = uploadedFileURL
-
-
-        availableSizes = availableSizes.toUpperCase().split(",");
-        data.availableSizes = availableSizes
-        for (i of availableSizes) {
-            if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(i)) {
-                return res.status(400).send({
-                    status: false,
-                    message: " Enter a valid availableSizes S, XS, M, X, L, XXL, XL "
-                })
-            }
-        }
 
 
         let checkTitle = await productModel.findOne({ title: title })
@@ -128,9 +131,12 @@ exports.UpdateProducts = async (req, res) => {
         let data = req.body
         let files = req.files
         let productId = req.params.productId
-        //console.log(files)
+
+        console.log(req.body,req.files)
 
         data = JSON.parse(JSON.stringify(data));
+        
+        console.log(data,files)
 
         if (!validObjectId.isValid(productId)) return res.status(400).send({ status: false, message: "Product id not valid" })
         let { title, description, price, currencyId, currencyFormat, productImage, style, availableSizes, installments, ...rest } = data
@@ -166,13 +172,14 @@ exports.UpdateProducts = async (req, res) => {
             if (currencyFormat.trim() !== "₹") return res.status(400).send({ status: false, message: "currencyFormat is invalid " })
             findProduct.currencyFormat = currencyFormat
         }
-        if (style) {
-            if (!validString(style)) return res.status(400).send({ status: false, message: "Style is invalid" })
+        if (data.hasOwnProperty("style")) {
+            if (!isValid(style)) return res.status(400).send({ status: false, message: "Style is invalid" })
             findProduct.style = style
         }
-        if (availableSizes) {
+
+        if (data.hasOwnProperty("availableSizes")) {
+            if (!isValid(availableSizes)) return res.status(400).send({ status: false, message: " please insert the availableSizes" })
             availableSizes = availableSizes.toUpperCase().split(",");
-            // data.availableSizes = availableSizes
             for (i of availableSizes) {
                 if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(i)) {
                     return res.status(400).send({
@@ -184,25 +191,19 @@ exports.UpdateProducts = async (req, res) => {
             findProduct.availableSizes = availableSizes
         }
 
-        if (installments) {
+        if (data.hasOwnProperty("installments")) {
+            if (!isValid(installments)) return res.status(400).send({ status: false, message: " please insert the installments" })
             if (isNaN(installments)) return res.status(400).send({ status: false, message: "installments should be a number" })
             findProduct.installments = installments
         }
 
-
-    if  (files.length>0) {
-        return res.status(400).send({ status: false, message: " please insert the Product Image" })
-     }
-    if(files.length >0){
-
-      
-         //  mimetype = files[0].mimetype.split("/") //---["image",""]
-         //  if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
-           var uploadedFileURL = await uploadFile(files[0])
+        if (data.hasOwnProperty("productImage")) return res.status(400).send({ status: false, message: " please insert the Product Image" })
+        if (files.length && files) {
+            mimetype = files[0].mimetype.split("/") //---["image",""]
+            if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
+            if (files && files.length > 0) var uploadedFileURL = await uploadFile(files[0])
             findProduct.productImage = uploadedFileURL
-    }
-         
-      
+        }
 
 
 
@@ -211,22 +212,17 @@ exports.UpdateProducts = async (req, res) => {
 
 
 
-  } catch (error) {
-             return res.status(500).send({ status: true, message: error.message })
+    } catch (error) {
+        return res.status(500).send({ status: true, message: error.message })
     }
 
 }
 
-
-
-
 exports.DeleteProducts = async (req, res) => {
     try {
-
         const productId = req.params.productId
 
         if (!validObjectId.isValid(productId)) return res.status(400).send({ status: false, message: "Product id not valid" })
-
         const productDetail = await productModel.findOne({ _id: productId })
         if (!productDetail) return res.status(404).send({ status: false, message: "product not found" })
 
