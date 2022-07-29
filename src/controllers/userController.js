@@ -40,8 +40,14 @@ exports.userRegister = async (req, res) => {
         if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "phone is invalid" })
         if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
 
-
-        address = address.split(" ").join("")
+        if (address.length) {
+            address = parseJSONSafely(address)
+            if (typeof address != "object") 
+            console.log(address)
+              return res.status(400).send({ status: false,message: "Please provide a address And address should be an object", })
+        }
+        console.log(address)
+            address = address.split(" ").join("")
         str = address.match(/:\d+/)[0].substring(1)
         x = ':"' + str + '"'
         address = address.replace(/:\d+/, x)
@@ -79,7 +85,7 @@ exports.userRegister = async (req, res) => {
         if (!validPincode.test(billing.pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid" })
 
         data.address = address
-
+            
         let findEmail = await userModel.findOne({ email: email })
         if (findEmail) return res.status(400).send({ status: false, message: "Email already exist" })
 
@@ -205,6 +211,7 @@ exports.updateUserDetails = async (req, res) => {
         }
 
         if (address) {
+            if(address.length) 
             if (address.match(/:\d+/) || address.match(/:\s+\d+/g)) {
                 address = address.split(" ").join("")
                 str = address.match(/:\d+/)[0].substring(1)
