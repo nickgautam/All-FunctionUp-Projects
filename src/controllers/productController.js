@@ -84,7 +84,7 @@ exports.getAllProduct = async (req, res) => {
         }
         if (data.hasOwnProperty("name")) {
             if (!validString(name)) { return res.status(400).send({ status: false, message: 'Please provide name ' }) }
-            filterData.title = { $regex: `${name.toLowerCase()}` }
+            filterData.title = { $regex: `${name.toLowerCase()}` } 
         }
         if (data.hasOwnProperty("priceGreaterThan")) {
             if (isNaN(priceGreaterThan)) return res.status(400).send({ status: false, message: "priceGreaterThan must be a number " })
@@ -132,10 +132,11 @@ exports.UpdateProducts = async (req, res) => {
         let files = req.files
         let productId = req.params.productId
 
+        console.log(req.body, req.files)
 
         data = JSON.parse(JSON.stringify(data));
-        
-        console.log(data,files)
+
+        console.log(data, files)
 
         if (!validObjectId.isValid(productId)) return res.status(400).send({ status: false, message: "Product id not valid" })
         let { title, description, price, currencyId, currencyFormat, productImage, style, availableSizes, installments, ...rest } = data
