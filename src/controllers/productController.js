@@ -7,6 +7,9 @@ const validObjectId = mongoose.Types.ObjectId
 const validTitle = /^[a-zA-Z0-9 ]{3,20}$/
 const validPrice = /^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$/  ///------- we need to update the regex decimal 2 digits
 
+function round(value, decimals) {
+    return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+}
 
 
 exports.createProducts = async (req, res) => {
@@ -30,8 +33,11 @@ exports.createProducts = async (req, res) => {
 
         if (!validTitle.test(title)) return res.status(400).send({ status: false, message: " title is invalid " })
         if (!isValid(description.trim())) return res.status(400).send({ status: false, message: " description  is invalid " })
-        if (!isNaN(description.trim())) return res.status(400).send({ status: false, message: "description can't be a number" })
+        if (!isNaN(description.trim())) return res.status(400).send({ status: false, message: "description can't be a number" })  
         if (!validPrice.test(price.trim())) return res.status(400).send({ status: false, message: "price is invalid " })
+        price = Number(price)
+        data.price = round(price, 2)
+
         if (currencyId.trim() !== "INR") return res.status(400).send({ status: false, message: "currencyId is invalid " })
         if (currencyFormat.trim() !== "₹") return res.status(400).send({ status: false, message: "currencyFormat is invalid " })
         if (!validString(style)) return res.status(400).send({ status: false, message: "Style is invalid" })
@@ -77,7 +83,7 @@ exports.getAllProduct = async (req, res) => {
     try {
         const filterData = { isDeleted: false }
         let data = req.query
-        let { size, name, priceGreaterThan, priceLessThan } = data
+        let { size, name, priceGreaterThan, priceLessThan, sort } = data
 
 
         if (data.hasOwnProperty("size")) {
@@ -99,7 +105,14 @@ exports.getAllProduct = async (req, res) => {
         if (data.hasOwnProperty("priceGreaterThan") && data.hasOwnProperty("priceLessThan")) {
             filterData.price = { $gt: priceGreaterThan, $lt: priceLessThan }
         }
+         if(data.hasOwnProperty("sort")){
+            if(sort == 1){
+                const productDetail = await productModel.find(filterData).sort({ price: 1 })
+        if (!productDetail.length) return res.status(404).send({ status: false, message: "Product not found" });
+        return res.status(200).send({ status: true, data: productDetail })
 
+            }
+         }
         const productDetail = await productModel.find(filterData).sort({ price: 1 })
         if (!productDetail.length) return res.status(404).send({ status: false, message: "Product not found" });
         return res.status(200).send({ status: true, data: productDetail })
