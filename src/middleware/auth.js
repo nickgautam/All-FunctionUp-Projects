@@ -11,7 +11,7 @@ exports.auth = async (req, res, next) => {
         });
         if(!decodedToken) return res.status(401).send({ status: false, message: "Token is invalid" });
         // console.log(decodedToken)
-        req.userId = decodedToken.userId;
+        if(req.params.userId !== decodedToken.userId) return res.status(401).send({ status: false, message: "User logged is not authorized to access & manipulate other's data" });
         next();
     } catch (error) { //hardcoded them
         return res.status(500).send({ status: false, message: error.message })
