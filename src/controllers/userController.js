@@ -38,17 +38,19 @@ exports.userRegister = async (req, res) => {
         if (!validName.test(lname)) return res.status(400).send({ status: false, message: "lname is invalid" })
         if (!validEmail.test(email)) return res.status(400).send({ status: false, message: "email is invalid" })
         if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "phone is invalid" })
-        if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
+        if (!validPassword.test(password)) {
+            return res.status(400).send({
+                status: false,
+                message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123"
+            })
+        }
 
 
-        // address = address.split(" ").join("")
-        // str = address.match(/:\d+/)[0].substring(1)
-        // x = ':"' + str + '"'
-        // address = address.replace(/:\d+/, x)
+
         address = parseJSONSafely(address)
+        console.log(address)
 
-
-        if (!isNaN(address) || !address) return res.status(400).send({ status: false, message: "Address should be in Object Format look like this. {'Key':'value'}" })
+        if (!isNaN(address) || !address) return res.status(400).send({ status: false, message: "Address should be in Object Format look like this. {'key':'value'} and value cannot start with 0-Zero" })
         if (!Object.keys(address).length) return res.status(400).send({ status: false, message: "Shipping and Billing Address are Required" })
         let { shipping, billing, ...remaining } = address
         if (!address.hasOwnProperty("shipping")) return res.status(400).send({ status: false, message: "Shipping Address is required " })
