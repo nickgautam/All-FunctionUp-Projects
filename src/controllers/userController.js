@@ -38,17 +38,19 @@ exports.userRegister = async (req, res) => {
         if (!validName.test(lname)) return res.status(400).send({ status: false, message: "lname is invalid" })
         if (!validEmail.test(email)) return res.status(400).send({ status: false, message: "email is invalid" })
         if (!validPhoneNumber.test(phone)) return res.status(400).send({ status: false, message: "phone is invalid" })
-        if (!validPassword.test(password)) return res.status(400).send({ status: false, message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123" })
+        if (!validPassword.test(password)) {
+            return res.status(400).send({
+                status: false,
+                message: "password must have atleast 1digit , 1uppercase , 1lowercase , special symbols(@$!%*?&) and between 8-15 range, ex:Nitin@123"
+            })
+        }
 
 
-        address = address.split(" ").join("")
-        str = address.match(/:\d+/)[0].substring(1)
-        x = ':"' + str + '"'
-        address = address.replace(/:\d+/, x)
+
         address = parseJSONSafely(address)
+        console.log(address)
 
-
-        if (!isNaN(address) || !address) return res.status(400).send({ status: false, message: "Address should be in Object Format look like this. {'street':'mg road 32'}" })
+        if (!isNaN(address) || !address) return res.status(400).send({ status: false, message: "Address should be in Object Format look like this. {'key':'value'} and value cannot start with 0-Zero" })
         if (!Object.keys(address).length) return res.status(400).send({ status: false, message: "Shipping and Billing Address are Required" })
         let { shipping, billing, ...remaining } = address
         if (!address.hasOwnProperty("shipping")) return res.status(400).send({ status: false, message: "Shipping Address is required " })
@@ -203,44 +205,44 @@ exports.updateUserDetails = async (req, res) => {
             if (files && files.length > 0) var uploadedFileURL = await awsController.uploadFile(files[0])
             finduser.profileImage = uploadedFileURL
         }
-
-        if (address) {
-            if (address.match(/:\d+/) || address.match(/:\s+\d+/g)) {
-                address = address.split(" ").join("")
-                str = address.match(/:\d+/)[0].substring(1)
-                x = ':"' + str + '"'
-                address = address.replace(/:\d+/, x)
-            }
+        
+     
+       
+       
+        if (data.hasOwnProperty("address")) {
             address = parseJSONSafely(address)
-            if (!isNaN(address) || !address) return res.status(400).send({ status: false, message: "Address should be in JSON Object Format look like this. {'street':'mg road 32'}" })
+            if (!isNaN(address) || !address) return res.status(400).send({ status: false, message: "Address should be in JSON Object Format look like this. {'key':'value'} and value can't be start with 0-zero" })
+            if (!Object.keys(address).length) return res.status(400).send({ status: false, message: "Please mention either Shipping or Billing Address " })// I added this line here
+            
             if (address.shipping) {
+                if (!Object.keys(address.shipping).length) return res.status(400).send({ status: false, message: "Please mention shipping (street||city||pincode)  " })// I added this line here 
                 let { street, city, pincode } = address.shipping;
-
-                if (street) {
+              if (address.shipping.hasOwnProperty("street")) {
                     if (!isValid(street)) return res.status(400).send({ status: false, message: "Shipping Street is invalid" })
                     finduser.address.shipping.street = street;
                 }
-                if (city) {
+                if (address.shipping.hasOwnProperty("city")) {
                     if (!validName.test(city)) return res.status(400).send({ status: false, message: "Shipping city is invalid" })
                     finduser.address.shipping.city = city;
-                }
-                if (pincode) {
+                 }
+                 if (address.shipping.hasOwnProperty("pincode")) {
                     if (!validPincode.test(pincode)) return res.status(400).send({ status: false, message: " Shipping pincode is invalid" })
                     finduser.address.shipping.pincode = pincode;
                 }
             }
 
             if (address.billing) {
+                if (!Object.keys(address.billing).length) return res.status(400).send({ status: false, message: "Please mention Billing (street||city||pincode) " })// I added this line here
                 let { street, city, pincode } = address.billing;
-                if (street) {
-                    if (!isValid(street)) return res.status(400).send({ status: false, message: "billing Street is invalid" })
+                if (address.billing.hasOwnProperty("street")) {
+                    if (!isValid(street)) return res.status(400).send({ status: false, message: "billing street is invalid" })
                     finduser.address.billing.street = street;
                 }
-                if (city) {
+                if (address.billing.hasOwnProperty("city")) {
                     if (!validName.test(city)) return res.status(400).send({ status: false, message: "billing city is invalid" })
                     finduser.address.billing.city = city;
-                }
-                if (pincode) {
+                 }
+                 if (address.billing.hasOwnProperty("pincode")) {
                     if (!validPincode.test(pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid" })
                     finduser.address.billing.pincode = pincode;
                 }
