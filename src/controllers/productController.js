@@ -18,8 +18,6 @@ exports.createProducts = async (req, res) => {
         let files = req.files
         data = JSON.parse(JSON.stringify(data));
 
-        data = JSON.parse(JSON.stringify(data));
-
         let { title, description, price, currencyId, currencyFormat, productImage, style, availableSizes, installments, ...rest } = data
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
@@ -113,9 +111,6 @@ exports.getAllProduct = async (req, res) => {
 
             }
          }
-        const productDetail = await productModel.find(filterData).sort({ price: 1 })
-        if (!productDetail.length) return res.status(404).send({ status: false, message: "Product not found" });
-        return res.status(200).send({ status: true, data: productDetail })
 
     } catch (error) {
         return res.status(500).send({ status: true, message: error.message })
@@ -147,11 +142,7 @@ exports.UpdateProducts = async (req, res) => {
         let files = req.files
         let productId = req.params.productId
 
-        console.log(req.body, req.files)
-
         data = JSON.parse(JSON.stringify(data));
-
-        console.log(data, files)
 
         if (!validObjectId.isValid(productId)) return res.status(400).send({ status: false, message: "Product id not valid" })
         let { title, description, price, currencyId, currencyFormat, productImage, style, availableSizes, installments, ...rest } = data
