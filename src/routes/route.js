@@ -3,7 +3,7 @@ const router = express.Router()
 const {auth} = require("../middleware/auth");
 const {userRegister,userLogin,getUserDetails,updateUserDetails}=require('../controllers/userController')
 const{createProducts,getAllProduct,getProductsById,UpdateProducts,DeleteProducts}=require('../controllers/productController')
-const {createCart}=require('../controllers/cartController')
+const {createCart,getCartDeatils}=require('../controllers/cartController')
 
 router.post('/register',userRegister)
 router.post('/login',userLogin)
@@ -20,6 +20,6 @@ router.delete('/products/:productId',DeleteProducts)
 //===============Cart =======================//
 
 router.post('/users/:userId',createCart)
-
+router.get('/users/:userId/cart',auth,getCartDeatils)
 
 module.exports= router
