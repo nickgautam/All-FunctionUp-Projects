@@ -113,6 +113,7 @@ exports.userLogin = async function (req, res) {
         if (Object.keys(credentials).length == 0) return res.status(400).send({ status: false, message: "Please enter email & password" })
         let { email, password } = credentials
         if (!email) return res.status(400).send({ status: false, message: "email is required" })
+        if (!password) return res.status(400).send({ status: false, message: "password is required" })
         if (!validEmail.test(email)) { return res.status(400).send({ status: false, message: `Email is not valid ${email}` }) }
         if (!password) return res.status(400).send({ status: false, message: "password is required" })
         if (!validPassword.test(password)) { return res.status(400).send({ status: false, message: `password is not valid ${password}` }) }
