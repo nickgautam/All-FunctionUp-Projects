@@ -4,6 +4,8 @@ const {auth} = require("../middleware/auth");
 const {userRegister,userLogin,getUserDetails,updateUserDetails}=require('../controllers/userController')
 const{createProducts,getAllProduct,getProductsById,UpdateProducts,DeleteProducts}=require('../controllers/productController')
 
+
+//============= User Routes============================================================================================//
 router.post('/register',userRegister)
 router.post('/login',userLogin)
 router.get('/user/:userId/profile',auth,getUserDetails)

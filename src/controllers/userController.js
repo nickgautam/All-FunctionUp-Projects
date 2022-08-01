@@ -58,27 +58,27 @@ exports.userRegister = async (req, res) => {
 
         if (Object.keys(remaining).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in address body" })
 
-        if (typeof shipping !== "object") return res.status(400).send({ status: false, message: "shipping is invalid type" })
+        if (typeof shipping !== "object") return res.status(400).send({ status: false, message: "shipping should be an object" })
         if (!shipping.hasOwnProperty("street")) return res.status(400).send({ status: false, message: "Shipping street is required " })
         if (!shipping.hasOwnProperty("city")) return res.status(400).send({ status: false, message: "Shipping city is required " })
         if (!shipping.hasOwnProperty("pincode")) return res.status(400).send({ status: false, message: "Shipping pincode is required " })
 
         if (!isValid(shipping.street)) return res.status(400).send({ status: false, message: " shipping street is invalid " })
-        if (!isValid(shipping.city)) return res.status(400).send({ status: false, message: " shipping city is invalid" })
+        // if (!isValid(shipping.city)) return res.status(400).send({ status: false, message: " shipping city is invalid" })
         if (!validName.test(shipping.city)) return res.status(400).send({ status: false, message: "Shipping city is invalid" })
-        if (!validPincode.test(shipping.pincode)) return res.status(400).send({ status: false, message: " shipping pincode is invalid" })
+        if (!validPincode.test(shipping.pincode)) return res.status(400).send({ status: false, message: " shipping pincode is invalid. There must be six digits" })
 
 
 
-        if (typeof billing !== "object") return res.status(400).send({ status: false, message: "billing is invalid type" })
+        if (typeof billing !== "object") return res.status(400).send({ status: false, message: "billing should be an object" })
         if (!billing.hasOwnProperty("street")) return res.status(400).send({ status: false, message: "billing street is required " })
         if (!billing.hasOwnProperty("city")) return res.status(400).send({ status: false, message: "billing city is required " })
         if (!billing.hasOwnProperty("pincode")) return res.status(400).send({ status: false, message: "billing pincode is required " })
 
         if (!isValid(billing.street)) return res.status(400).send({ status: false, message: " billing street is invalid " })
-        if (!isValid(billing.city)) return res.status(400).send({ status: false, message: "billing city is invalid" })
-        if (!validName.test(billing.city)) return res.status(400).send({ status: false, message: "Shipping city is invalid" })
-        if (!validPincode.test(billing.pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid" })
+        // if (!isValid(billing.city)) return res.status(400).send({ status: false, message: "billing city is invalid" })
+        if (!validName.test(billing.city)) return res.status(400).send({ status: false, message: "billing city is invalid" })
+        if (!validPincode.test(billing.pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid. There must be six digits" })
 
         data.address = address
 
@@ -127,7 +127,7 @@ exports.userLogin = async function (req, res) {
                 const token = jwt.sign({
                     userId: user._id,
                     iat: Math.floor(Date.now() / 1000),
-                    exp: Math.floor(Date.now() / 1000) + 23 * 60 * 60
+                    exp: Math.floor(Date.now() / 1000) + 23* 60 * 60
                 }, "my@fifth@project@product@management")
 
                 let final = { userId: user._id, token: token }
@@ -143,12 +143,12 @@ exports.userLogin = async function (req, res) {
     }
 }
 exports.getUserDetails = async (req, res) => {
-    const userId = req.params.userId
+    let userId = req.params.userId
 
     try {
-        if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
-        const checkUserId = await userModel.findById(userId)
-        if (!checkUserId) return res.status(404).send({ status: false, message: "User not found" })
+       // if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
+        let checkUserId = await userModel.findById(userId)
+        // if (!checkUserId) return res.status(404).send({ status: false, message: "User not found" })
 
         return res.status(200).send({ status: true, message: "User profile details", data: checkUserId })
     } catch (error) {
@@ -167,19 +167,19 @@ exports.updateUserDetails = async (req, res) => {
         let files = req.files
         let { fname, lname, email, profileImage, phone, password, address, ...rest } = data
 
-        if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
+        //if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
 
-        const finduser = await userModel.findById(userId)
-        if (!finduser) return res.status(404).send({ status: false, message: "User not found" })
+         const finduser = await userModel.findById(userId)
+        // if (!finduser) return res.status(404).send({ status: false, message: "User not found" })
 
 
-        if (fname) {
+        if (data.hasOwnProperty("fname")) {
             if (!validName.test(fname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
             finduser.fname = fname
         }
-        if (lname) {
+        if (data.hasOwnProperty("lname")) {
             if (!validName.test(lname)) return res.status(400).send({ status: false, message: "lname is Invalid" })
             finduser.lname = lname
         }
@@ -250,7 +250,7 @@ exports.updateUserDetails = async (req, res) => {
         }
 
         let updateProfile = await userModel.findByIdAndUpdate({ _id: userId }, finduser, { new: true });
-        res.status(200).send({ status: true, message: "User profile updated", data: updateProfile });
+        return res.status(200).send({ status: true, message: "User profile updated", data: updateProfile });
 
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
