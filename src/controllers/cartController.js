@@ -31,6 +31,10 @@ exports.createCart = async (req, res) => {
             let createCart=await cartModel.create(data)
             return res.status(201).send({status:true,message:"Cart Successfully created", data:createCart})
         }
+        if(data.cartId){
+            let findCart = await cartModel.findById(data.cartId)
+            if (!mongoose.Types.ObjectId.isValid(data.cartId)) return res.status(400).send({ status: false, message: "productId is not valid" })
+            if(!findCart) return res.status(404).send({ status: false, message: "cart not found" })
         let { items } = data
         for (products of items) {
             let { productId, quantity } = products
@@ -45,7 +49,7 @@ exports.createCart = async (req, res) => {
         
                  }
         }
-
+    }
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
     }
