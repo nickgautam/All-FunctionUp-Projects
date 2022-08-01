@@ -5,6 +5,8 @@ const {userRegister,userLogin,getUserDetails,updateUserDetails}=require('../cont
 const{createProducts,getAllProduct,getProductsById,UpdateProducts,DeleteProducts}=require('../controllers/productController')
 const {createCart,getCartDeatils}=require('../controllers/cartController')
 
+
+//============= User Routes============================================================================================//
 router.post('/register',userRegister)
 router.post('/login',userLogin)
 router.get('/user/:userId/profile',auth,getUserDetails)

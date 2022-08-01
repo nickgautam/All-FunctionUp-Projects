@@ -163,7 +163,7 @@ exports.UpdateProducts = async (req, res) => {
 
 
         if (!((isFreeShipping == "true") || (isFreeShipping == "false")))
-            return res.status(400).send({ status: false, messsage: "isFreeShipping shouuld be in boolean value" })
+            return res.status(400).send({ status: false, messsage: "isFreeShipping should be boolean value" })
 
 
         if (Object.keys(data).length == 0 && (!files)) return res.status(400).send({ status: false, message: "Please enter some data to update" })
@@ -256,7 +256,7 @@ exports.DeleteProducts = async (req, res) => {
 
         if (productDetail.isDeleted == true) return res.status(400).send({ status: false, message: "Product already deleted" })
 
-        const DeleteProduct = await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true })
+         await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true })
         return res.status(200).send({ status: true, message: "Product Deleted Succesfully" })
 
     } catch (error) {
