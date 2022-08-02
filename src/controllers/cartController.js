@@ -10,65 +10,111 @@ exports.createCart = async (req, res) => {
         let userId = req.params.userId
         let data = req.body
         let totalPrice = 0;
-        let totalItems
+        let checkCart = await cartModel.findOne({ userId: userId }).populate("userId").populate("items.productId")
+        
+        
 
-        let checkCart = await cartModel.findOne({ userId: userId })
 
-        if (!checkCart) { 
+        if (!checkCart) {
             data.userId = userId
-            let { items } = data
-            for (products of items) {
-                let { productId, quantity } = products
-                console.log(products)
-                if (!mongoose.Types.ObjectId.isValid(productId)) return res.status(400).send({ status: false, message: "productId is not valid" })
+            let { productId, quantity } = data
+            if (!mongoose.Types.ObjectId.isValid(productId)) return res.status(400).send({ status: false, message: "productId is not valid" })
+            if (data.hasOwnProperty("quantity")) {
                 if (quantity <= 0) return res.status(400).send({ status: false, message: "quantity should be in between 0-20" })
-                let findProduct = await productModel.findOne({ _id: productId, isDeleted: false })
-                if (!findProduct) return res.status(404).send({ status: false, message: "Product not found" })
-                totalPrice = totalPrice + (findProduct.price * quantity)
+            } else {
+                quantity = 1
             }
-            data.totalItems = items.length
+            let findProduct = await productModel.findOne({ _id: productId, isDeleted: false })
+            if (!findProduct) return res.status(404).send({ status: false, message: "Product not found" })
+            data.items = { productId, quantity }
+            totalPrice = totalPrice + (findProduct.price * quantity)
+            data.totalItems = 1
             data.totalPrice = totalPrice
-
             let createCart = await cartModel.create(data)
             return res.status(201).send({ status: true, message: "Cart Successfully created", data: createCart })
         }
-        
-        let { items } = data
-        for (products of items) {
-            let { productId, quantity } = products
-            if (!mongoose.Types.ObjectId.isValid(productId)) return res.status(400).send({ status: false, message: "productId is not valid" })
-            if (quantity <= 0) return res.status(400).send({ status: false, message: "quantity should be in between 0-20" })
 
+        if (checkCart) {
+            let { productId, quantity } = data
+            if (!mongoose.Types.ObjectId.isValid(productId)) return res.status(400).send({ status: false, message: "productId is not valid" })
+            if (data.hasOwnProperty("quantity")) {
+                if (quantity <= 0) return res.status(400).send({ status: false, message: "quantity should be in between 0-20" })
+            } else {
+                quantity = 1
+            }
             let findProduct = await productModel.findOne({ _id: productId, isDeleted: false })
             if (!findProduct) return res.status(404).send({ status: false, message: "Product not found" })
 
-            console.log( checkCart.items)
-
             let findObjIdIndex = checkCart.items.findIndex(obj => obj.productId.toString() === productId)
-            console.log(checkCart.items[findObjIdIndex])
-            if(checkCart.items[findObjIdIndex]){
-                checkCart.items[findObjIdIndex].quantity+=quantity
-                checkCart.totalPrice=checkCart.totalPrice +(findProduct.price * quantity)
-            }
-            else{
-                checkCart.items.push(products)
-                checkCart.totalPrice=checkCart.totalPrice + (findProduct.price * quantity)
-            }
-            
-        }
-        checkCart.totalItems = checkCart.items.length
-        let createCart = await cartModel.findByIdAndUpdate(checkCart._id, checkCart, { new: true })
-        return res.status(201).send({ status: true, message: "Cart Successfully created", data: createCart })
 
-    } catch (error) {
+
+            if (checkCart.items[findObjIdIndex]) {
+                checkCart.items[findObjIdIndex].quantity += quantity
+                checkCart.totalPrice = checkCart.totalPrice + (findProduct.price * quantity)
+            }
+            else {
+                checkCart.items.push({ productId, quantity })
+                checkCart.totalPrice = checkCart.totalPrice + (findProduct.price * quantity)
+            }
+
+
+            checkCart.totalItems = checkCart.items.length
+            let createCart = await cartModel.findByIdAndUpdate(checkCart._id, checkCart, { new: true }).select({ "items._id": 0 }).populate("items.productId", { title: 1, _id: 1, price: 1 })
+            return res.status(200).send({ status: true, message: "Product SuccessFully Added", data: createCart })
+        }
+    }
+
+
+    catch (error) {
         return res.status(500).send({ status: false, message: error.message })
     }
 
 }
 
+exports.updateCart = async (req, res) => {
+    try {
 
+        let userId = req.params.userId
+        let data = req.body
+        let totalPrice = 0;
 
+        let checkCart = await cartModel.findOne({ userId: userId })
+        if (!checkCart) return res.status(404).send({ status: false, message: "There is No cart present for this User" })
 
+        let { productId, removeProduct } = data
+        if (!mongoose.Types.ObjectId.isValid(productId)) return res.status(400).send({ status: false, message: "productId is not valid" })
+
+        findProductIndex = checkCart.items.findIndex((obj) => obj.productId == productId)
+        if (!checkCart.items[findProductIndex]) return res.status(404).send({ status: false, message: "This Product is not Present in Your Cart" })
+
+        let product = await productModel.findOne({ _id: productId })
+
+        if (removeProduct === 1) {
+
+            checkCart.items[findProductIndex].quantity -= 1
+
+            if (checkCart.items[findProductIndex].quantity === 0) {
+                checkCart.items.splice(findProductIndex, 1)
+                checkCart.totalItems -= 1
+            }
+
+            checkCart.totalPrice = checkCart.totalPrice - (product.price)
+
+        }
+        else if (removeProduct === 0) {
+            checkCart.totalPrice = checkCart.totalPrice - (product.price * (checkCart.items[findProductIndex].quantity))
+            checkCart.items.splice(findProductIndex, 1)
+            checkCart.totalItems -= 1
+        }
+
+        let cartUpdate = await cartModel.findOneAndUpdate({ _id: checkCart._id }, checkCart, { new: true })
+        return res.status(200).send({ status: true, message: "Cart SuccessFully Update", data: cartUpdate })
+    }
+
+    catch (error) {
+        return res.status(500).send({ status: false, message: error.message })
+    }
+}
 
 exports.getCartDeatils = async (req, res) => {
 
@@ -91,23 +137,17 @@ exports.getCartDeatils = async (req, res) => {
 
 }
 
-
-
 exports.DeleteCart = async (req, res) => {
-
-
 
     let userId = req.params.userId
     if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "Invalid user Id" })
 
     let checkCart = await cartModel.findOne({ userId: userId })
-    //console.log(checkCart)
     if (!checkCart) return res.status(404).send({ status: false, message: "cart not found" })
 
+    if (checkCart.items.length === 0) return res.status(400).send({ status: false, message: "cart is already deleted" })
 
-
-    let deletedCart = await cartModel.findOneAndUpdate({ _id: userId }, { $set: { items: [], totalPrice: 0, totalItems: 0 } }, { new: true })
-    //  if (deletedCart) return res.status(400).send({ status: false, message: "cart already deleted" })
+    let deletedCart = await cartModel.findOneAndUpdate({ _id: checkCart._id }, { $set: { items: [], totalPrice: 0, totalItems: 0 } }, { new: true })
     return res.status(204).send({ status: true, message: "cart Deleted Succesfully" })  //204 = No content found//
 
 
