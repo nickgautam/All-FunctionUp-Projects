@@ -10,9 +10,14 @@ exports.createCart = async (req, res) => {
         let userId = req.params.userId
         let data = req.body
         let totalPrice = 0;
-        let totalItems
+        // let totalItems
 
         let checkCart = await cartModel.findOne({ userId: userId })
+
+        if(!data.cartId){
+            if (checkCart) return res.status(400).send({ status: false, message: "cart is already exist. Please enter your cartId" })
+        }
+       
         if (!checkCart) {
             data.userId = userId
             let { items } = data
@@ -30,12 +35,14 @@ exports.createCart = async (req, res) => {
 
             let createCart=await cartModel.create(data)
             return res.status(201).send({status:true,message:"Cart Successfully created", data:createCart})
-        }
+        } 
         if(data.cartId){
-            let findCart = await cartModel.findById(data.cartId)
-            if (!mongoose.Types.ObjectId.isValid(data.cartId)) return res.status(400).send({ status: false, message: "productId is not valid" })
+            let { items,cartId } = data
+            if (!mongoose.Types.ObjectId.isValid(cartId)) return res.status(400).send({ status: false, message: "productId is not valid" })
+            let findCart = await cartModel.findOne({_id:cartId})
             if(!findCart) return res.status(404).send({ status: false, message: "cart not found" })
-        let { items } = data
+            if(userId!==findCart.userId.toString()) return res.status(400).send({ status: false, message: "This cart doesn't belong to the user." })
+            console.log(userId,findCart.userId.toString())
         for (products of items) {
             let { productId, quantity } = products
             if (!mongoose.Types.ObjectId.isValid(productId)) return res.status(400).send({ status: false, message: "productId is not valid" })
