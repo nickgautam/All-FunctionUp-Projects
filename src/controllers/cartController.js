@@ -10,11 +10,9 @@ exports.createCart = async (req, res) => {
         let userId = req.params.userId
         let data = req.body
         let totalPrice = 0;
-        let checkCart = await cartModel.findOne({ userId: userId }).populate("userId").populate("items.productId")
+        let checkCart = await cartModel.findOne({ userId: userId })
         
         
-
-
         if (!checkCart) {
             data.userId = userId
             let { productId, quantity } = data
