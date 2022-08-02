@@ -102,12 +102,10 @@ exports.DeleteCart = async (req, res) => {
 
     let checkCart = await cartModel.findOne({ userId: userId })
     //console.log(checkCart)
-    if (!checkCart) return res.status(404).send({ status: false, message: "cart not found" })
-
-
-
+    //if (!checkCart) return res.status(404).send({ status: false, message: "cart not found" })
+    
     let deletedCart = await cartModel.findOneAndUpdate({ _id: userId }, { $set: { items: [], totalPrice: 0, totalItems: 0 } }, { new: true })
-    //  if (deletedCart) return res.status(400).send({ status: false, message: "cart already deleted" })
+      if (deletedCart) return res.status(400).send({ status: false, message: "cart already deleted" })
     return res.status(204).send({ status: true, message: "cart Deleted Succesfully" })  //204 = No content found//
 
 

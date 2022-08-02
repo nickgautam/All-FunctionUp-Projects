@@ -22,6 +22,6 @@ router.delete('/products/:productId',DeleteProducts)
 //===============Cart =======================//
 
 router.post('/users/:userId',createCart)
-router.get('/users/:userId/cart',auth,getCartDeatils)
+router.get('/users/:userId/cart',getCartDeatils)
 router.delete('/users/:userId/cart',DeleteCart)
 module.exports= router
