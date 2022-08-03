@@ -4,7 +4,7 @@ const {authentication,authorization} = require("../middleware/auth");
 const {userRegister,userLogin,getUserDetails,updateUserDetails}=require('../controllers/userController')
 const{createProducts,getAllProduct,getProductsById,UpdateProducts,DeleteProducts}=require('../controllers/productController')
 const {createCart,updateCart,getCartDeatils,DeleteCart}=require('../controllers/cartController')
-const {createOrder} =require('../controllers/orderController')
+const {createOrder,updateOrder} =require('../controllers/orderController')
 
 //============= User Routes============================================================================================//
 router.post('/register',userRegister)
@@ -27,6 +27,7 @@ router.delete('/users/:userId/cart',authentication,authorization,DeleteCart)
 
 //============Order Routes ==========================//
 router.post('/users/:userId/orders',authentication,authorization,createOrder)
+router.put('/users/:userId/orders',updateOrder)
 
 
 module.exports= router

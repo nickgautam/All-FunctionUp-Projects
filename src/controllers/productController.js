@@ -261,8 +261,4 @@ exports.DeleteProducts = async (req, res) => {
         return res.status(500).send({ status: true, message: error.message })
     }
 
-
-
 }
-
-
