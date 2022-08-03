@@ -127,7 +127,7 @@ exports.userLogin = async function (req, res) {
                 const token = jwt.sign({
                     userId: user._id,
                     iat: Math.floor(Date.now() / 1000),
-                    exp: Math.floor(Date.now() / 1000) + 23* 60* 60
+                    exp: Math.floor(Date.now() / 1000) + 1* 1* 60
                 }, "my@fifth@project@product@management")
 
                 let final = { userId: user._id, token: token }
@@ -144,8 +144,7 @@ exports.userLogin = async function (req, res) {
 }
 exports.getUserDetails = async (req, res) => {
     let userId = req.params.userId
-
-    try {
+   try {
         if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
         if(userId!=req.userId) return res.status(400).send({ status: false, message: "user not authorized" })
         const checkUserId = await userModel.findById(userId)
