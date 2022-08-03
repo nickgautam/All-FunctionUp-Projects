@@ -13,8 +13,6 @@ exports.createCart = async (req, res) => {
         let checkCart = await cartModel.findOne({ userId: userId })
         
         
-
-
         if (!checkCart) {
             data.userId = userId
             let { productId, quantity } = data
