@@ -109,17 +109,18 @@ exports.getAllProduct = async (req, res) => {
         }
         if (data.hasOwnProperty("sort")) {
             if (sort == 1) {
-                          const productDetail = await productModel.find(filterData).sort({ price: 1 })
-                  if (!productDetail.length) return res.status(404).send({ status: false, message: "Product not found" });
-                  return res.status(200).send({ status: true, data: productDetail })
+                const productDetail = await productModel.find(filterData).sort({ price: 1 })
+                if (!productDetail.length) return res.status(404).send({ status: false, message: "Product not found" });
+                return res.status(200).send({ status: true, data: productDetail })
 
-             }
-        if(sort==-1){
-        const productDetail = await productModel.find(filterData).sort({ price: -1 })
-        if (!productDetail.length) return res.status(404).send({ status: false, message: "Product not found" });
-        return res.status(200).send({ status: true, data: productDetail })
+            }
+            if (sort == -1) {
+                const productDetail = await productModel.find(filterData).sort({ price: -1 })
+                if (!productDetail.length) return res.status(404).send({ status: false, message: "Product not found" });
+                return res.status(200).send({ status: true, data: productDetail })
             }
         }
+        
     } catch (error) {
         return res.status(500).send({ status: true, message: error.message })
     }
@@ -254,7 +255,7 @@ exports.DeleteProducts = async (req, res) => {
 
         if (productDetail.isDeleted == true) return res.status(400).send({ status: false, message: "Product already deleted" })
 
-         await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true })
+        await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true })
         return res.status(200).send({ status: true, message: "Product Deleted Succesfully" })
 
     } catch (error) {

@@ -13,9 +13,6 @@ const productSchema = new mongoose.Schema({
         installments: { type: Number },
         deletedAt: { type: Date, default: null },
         isDeleted: { type: Boolean, default: false }
-
-
-
 }, { timestamps: true });
 
 module.exports = mongoose.model("Product", productSchema)
