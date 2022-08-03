@@ -45,8 +45,10 @@ exports.createProducts = async (req, res) => {
         if (installments) {
             if (isNaN(installments)) return res.status(400).send({ status: false, message: "installments should be a number" })
         }
-        if (!((isFreeShipping == "true") || (isFreeShipping == "false")))
-            return res.status(400).send({ status: false, messsage: "isFreeShipping should be in boolean value" })
+        if(data.hasOwnProperty("isFreeShipping")) {
+            if (!((isFreeShipping == "true") || (isFreeShipping == "false")))
+                return res.status(400).send({ status: false, messsage: "isFreeShipping should be in boolean value" })
+            }
 
         if (data.hasOwnProperty("availableSizes")) {
             availableSizes = availableSizes.toUpperCase().split(",");
@@ -85,8 +87,8 @@ exports.getAllProduct = async (req, res) => {
     try {
         const filterData = { isDeleted: false }
         let data = req.query
-        let { size, name, priceGreaterThan, priceLessThan, sort } = data
-
+        let { size, name, priceGreaterThan, priceLessThan, priceSort } = data
+        priceSort=1;
 
         if (data.hasOwnProperty("size")) {
             if (!isValid(size)) { return res.status(400).send({ status: false, message: "Please provide size" }) }
@@ -107,20 +109,15 @@ exports.getAllProduct = async (req, res) => {
         if (data.hasOwnProperty("priceGreaterThan") && data.hasOwnProperty("priceLessThan")) {
             filterData.price = { $gt: priceGreaterThan, $lt: priceLessThan }
         }
-        if (data.hasOwnProperty("sort")) {
-            if (sort == 1) {
-                const productDetail = await productModel.find(filterData).sort({ price: 1 })
-                if (!productDetail.length) return res.status(404).send({ status: false, message: "Product not found" });
-                return res.status(200).send({ status: true, data: productDetail })
-
-            }
-            if (sort == -1) {
-                const productDetail = await productModel.find(filterData).sort({ price: -1 })
-                if (!productDetail.length) return res.status(404).send({ status: false, message: "Product not found" });
-                return res.status(200).send({ status: true, data: productDetail })
-            }
+        if (data.hasOwnProperty("priceSort")) {
+            priceSort = data.priceSort
+          if(!(priceSort==1||priceSort==-1)) return res.status(400).send({ status: false, message: "priceSort must be either 1 & -1" })
         }
-        
+        const productDetail = await productModel.find(filterData).sort({ price: priceSort })
+        if (!productDetail.length) return res.status(404).send({ status: false, message: "Product not found" });
+        return res.status(200).send({ status: true, data: productDetail })
+
+
     } catch (error) {
         return res.status(500).send({ status: true, message: error.message })
     }
@@ -161,8 +158,10 @@ exports.UpdateProducts = async (req, res) => {
         let { title, description, price, currencyId, currencyFormat, productImage, style, availableSizes, installments, isFreeShipping, ...rest } = data
 
 
-        if (!((isFreeShipping == "true") || (isFreeShipping == "false")))
-            return res.status(400).send({ status: false, messsage: "isFreeShipping should be boolean value" })
+         if(data.hasOwnProperty("isFreeShipping")) {
+            if (!((isFreeShipping == "true") || (isFreeShipping == "false")))
+                return res.status(400).send({ status: false, messsage: "isFreeShipping should be in boolean value" })
+            }
 
 
         if (Object.keys(data).length == 0 && (!files)) return res.status(400).send({ status: false, message: "Please enter some data to update" })
