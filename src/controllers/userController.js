@@ -46,9 +46,8 @@ exports.userRegister = async (req, res) => {
         }
 
 
-
         address = parseJSONSafely(address)
-        console.log(address)
+        //console.log(address)
 
         if (!isNaN(address) || !address) return res.status(400).send({ status: false, message: "Address should be in Object Format look like this. {'key':'value'} and value cannot start with 0-Zero" })
         if (!Object.keys(address).length) return res.status(400).send({ status: false, message: "Shipping and Billing Address are Required" })
@@ -81,7 +80,7 @@ exports.userRegister = async (req, res) => {
         if (!validPincode.test(billing.pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid. There must be six digits" })
 
         data.address = address
-
+            
         let findEmail = await userModel.findOne({ email: email })
         if (findEmail) return res.status(400).send({ status: false, message: "Email already exist" })
 
@@ -128,7 +127,7 @@ exports.userLogin = async function (req, res) {
                 const token = jwt.sign({
                     userId: user._id,
                     iat: Math.floor(Date.now() / 1000),
-                    exp: Math.floor(Date.now() / 1000) + 23* 60 * 60
+                    exp: Math.floor(Date.now() / 1000) + 1* 1* 60
                 }, "my@fifth@project@product@management")
 
                 let final = { userId: user._id, token: token }
@@ -145,11 +144,11 @@ exports.userLogin = async function (req, res) {
 }
 exports.getUserDetails = async (req, res) => {
     let userId = req.params.userId
-
-    try {
-       //commited by nishant// if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
-        let checkUserId = await userModel.findById(userId)
-        //commited by nishant// if (!checkUserId) return res.status(404).send({ status: false, message: "User not found" })
+   try {
+        if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
+        if(userId!=req.userId) return res.status(400).send({ status: false, message: "user not authorized" })
+        const checkUserId = await userModel.findById(userId)
+        if (!checkUserId) return res.status(404).send({ status: false, message: "User not found" })
 
         return res.status(200).send({ status: true, message: "User profile details", data: checkUserId })
     } catch (error) {
@@ -168,7 +167,8 @@ exports.updateUserDetails = async (req, res) => {
         let files = req.files
         let { fname, lname, email, profileImage, phone, password, address, ...rest } = data
 
-        //if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
+        if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
+        if(userId!=req.userId) return res.status(400).send({ status: false, message: "user not authorized" })
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
 
@@ -257,3 +257,4 @@ exports.updateUserDetails = async (req, res) => {
         return res.status(500).send({ status: false, message: error.message })
     }
 }
+

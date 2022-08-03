@@ -150,8 +150,6 @@ exports.UpdateProducts = async (req, res) => {
         let files = req.files
         let productId = req.params.productId
 
-        console.log(req.body, req.files)
-
         data = JSON.parse(JSON.stringify(data));
 
         console.log(data, files)

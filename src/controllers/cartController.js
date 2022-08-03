@@ -108,7 +108,7 @@ exports.updateCart = async (req, res) => {
         let cartUpdate = await cartModel.findOneAndUpdate({ _id: checkCart._id }, checkCart, { new: true })
         return res.status(200).send({ status: true, message: "Cart SuccessFully Update", data: cartUpdate })
     }
-
+    
     catch (error) {
         return res.status(500).send({ status: false, message: error.message })
     }
