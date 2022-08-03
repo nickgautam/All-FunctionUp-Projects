@@ -26,7 +26,7 @@ router.get('/users/:userId/cart',authentication,authorization,getCartDeatils)
 router.delete('/users/:userId/cart',authentication,authorization,DeleteCart)
 
 //============Order Routes ==========================//
-router.post('/users/:userId/orders',createOrder)
+router.post('/users/:userId/orders',authentication,authorization,createOrder)
 
 
 module.exports= router

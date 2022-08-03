@@ -2,8 +2,6 @@ const mongoose = require('mongoose')
 
 const orderSchema = new mongoose.Schema({
 
-
-
     userId: {
         type: mongoose.Types.ObjectId,
         ref: "User",
@@ -21,7 +19,7 @@ const orderSchema = new mongoose.Schema({
         }
 
     ],
-    totalPrice: { type: Number, require: true },
+    totalPrice: { type: Number, require: true},
     totalItems: { type: Number, require: true },
     totalQuantity: { type: Number, require: true },
     cancellable: { type: Boolean, default: true },
@@ -29,11 +27,6 @@ const orderSchema = new mongoose.Schema({
     deletedAt: { type: Date,default:null },
     isDeleted: { type: Boolean, default: false },
 
-
-
-
-
 })
-
 
 module.exports = mongoose.model("Order", orderSchema)
