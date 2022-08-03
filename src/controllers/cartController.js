@@ -57,7 +57,7 @@ exports.createCart = async (req, res) => {
 
 
             checkCart.totalItems = checkCart.items.length
-            let createCart = await cartModel.findByIdAndUpdate(checkCart._id, checkCart, { new: true }).select({ "items._id": 0 }).populate("items.productId", { title: 1, _id: 1, price: 1 })
+            let createCart = await cartModel.findByIdAndUpdate(checkCart._id, checkCart, { new: true }).select({ "items._id": 0 }).populate("items.productId", { title: 1, _id: 0, price: 1 })
             return res.status(200).send({ status: true, message: "Product SuccessFully Added", data: createCart })
         }
     }
