@@ -1,11 +1,20 @@
-const productModel = require('../models/productModel')
+const orderModel = require('../models/productModel')
 
 
 
-exports.createOrder = (req,res)=>{
+exports.createOrder = async (req,res)=>{
     try {
         let userId =req.params.userId
-        
+        let data=req.body
+        const OrderCreate = await orderModel.create(data)
+        return res.status(200).send({status:true , message:"Order Created Successfully"})
+
+
+
+
+
+
+
 
 
 
