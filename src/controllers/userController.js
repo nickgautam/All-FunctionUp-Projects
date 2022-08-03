@@ -21,8 +21,7 @@ exports.userRegister = async (req, res) => {
         let files = req.files
 
         //data = JSON.parse(JSON.stringify(data));
-        //data.address = JSON.parse(data.address)
-
+    
         let { fname, lname, email, profileImage, phone, password, address, ...rest } = data
 
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
@@ -63,7 +62,6 @@ exports.userRegister = async (req, res) => {
         if (!shipping.hasOwnProperty("pincode")) return res.status(400).send({ status: false, message: "Shipping pincode is required " })
 
         if (!isValid(shipping.street)) return res.status(400).send({ status: false, message: " shipping street is invalid " })
-        // if (!isValid(shipping.city)) return res.status(400).send({ status: false, message: " shipping city is invalid" })
         if (!validName.test(shipping.city)) return res.status(400).send({ status: false, message: "Shipping city is invalid" })
         if (!validPincode.test(shipping.pincode)) return res.status(400).send({ status: false, message: " shipping pincode is invalid. There must be six digits" })
 
@@ -74,13 +72,12 @@ exports.userRegister = async (req, res) => {
         if (!billing.hasOwnProperty("city")) return res.status(400).send({ status: false, message: "billing city is required " })
         if (!billing.hasOwnProperty("pincode")) return res.status(400).send({ status: false, message: "billing pincode is required " })
 
-        if (!isValid(billing.street)) return res.status(400).send({ status: false, message: " billing street is invalid " })
-        // if (!isValid(billing.city)) return res.status(400).send({ status: false, message: "billing city is invalid" })
+        if (!isValid(billing.street)) return res.status(400).send({ status: false, message: " billing street is invalid " }) 
         if (!validName.test(billing.city)) return res.status(400).send({ status: false, message: "billing city is invalid" })
         if (!validPincode.test(billing.pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid. There must be six digits" })
 
         data.address = address
-            
+
         let findEmail = await userModel.findOne({ email: email })
         if (findEmail) return res.status(400).send({ status: false, message: "Email already exist" })
 
@@ -127,7 +124,7 @@ exports.userLogin = async function (req, res) {
                 const token = jwt.sign({
                     userId: user._id,
                     iat: Math.floor(Date.now() / 1000),
-                    exp: Math.floor(Date.now() / 1000) + 1* 1* 60
+                    exp: Math.floor(Date.now() / 1000) + 23 * 60 * 60
                 }, "my@fifth@project@product@management")
 
                 let final = { userId: user._id, token: token }
@@ -144,13 +141,12 @@ exports.userLogin = async function (req, res) {
 }
 exports.getUserDetails = async (req, res) => {
     let userId = req.params.userId
-   try {
-        if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
-        if(userId!=req.userId) return res.status(400).send({ status: false, message: "user not authorized" })
-        const checkUserId = await userModel.findById(userId)
-        if (!checkUserId) return res.status(404).send({ status: false, message: "User not found" })
+    try {
+        checkUser = req.checkUser
+        // const checkUser = await userModel.findById(userId)
+        // if (!checkUser) return res.status(404).send({ status: false, message: "User not found" })
 
-        return res.status(200).send({ status: true, message: "User profile details", data: checkUserId })
+        return res.status(200).send({ status: true, message: "User profile details", data: checkUser })
     } catch (error) {
 
         return res.status(500).send({ status: false, message: error.message })
@@ -167,14 +163,12 @@ exports.updateUserDetails = async (req, res) => {
         let files = req.files
         let { fname, lname, email, profileImage, phone, password, address, ...rest } = data
 
-        if (!mongoose.Types.ObjectId.isValid(userId)) return res.status(400).send({ status: false, message: "User id not valid" })
-        if(userId!=req.userId) return res.status(400).send({ status: false, message: "user not authorized" })
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
 
-         const finduser = await userModel.findById(userId)
+        // const finduser = await userModel.findById(userId)
         // if (!finduser) return res.status(404).send({ status: false, message: "User not found" })
-
+        finduser = req.checkUser
 
         if (data.hasOwnProperty("fname")) {
             if (!validName.test(fname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
@@ -206,27 +200,27 @@ exports.updateUserDetails = async (req, res) => {
             if (files && files.length > 0) var uploadedFileURL = await awsController.uploadFile(files[0])
             finduser.profileImage = uploadedFileURL
         }
-        
-     
-       
-       
+
+
+
+
         if (data.hasOwnProperty("address")) {
             address = parseJSONSafely(address)
             if (!isNaN(address) || !address) return res.status(400).send({ status: false, message: "Address should be in JSON Object Format look like this. {'key':'value'} and value can't be start with 0-zero" })
             if (!Object.keys(address).length) return res.status(400).send({ status: false, message: "Please mention either Shipping or Billing Address " })// I added this line here
-            
+
             if (address.shipping) {
                 if (!Object.keys(address.shipping).length) return res.status(400).send({ status: false, message: "Please mention shipping (street||city||pincode)  " })// I added this line here 
                 let { street, city, pincode } = address.shipping;
-              if (address.shipping.hasOwnProperty("street")) {
+                if (address.shipping.hasOwnProperty("street")) {
                     if (!isValid(street)) return res.status(400).send({ status: false, message: "Shipping Street is invalid" })
                     finduser.address.shipping.street = street;
                 }
                 if (address.shipping.hasOwnProperty("city")) {
                     if (!validName.test(city)) return res.status(400).send({ status: false, message: "Shipping city is invalid" })
                     finduser.address.shipping.city = city;
-                 }
-                 if (address.shipping.hasOwnProperty("pincode")) {
+                }
+                if (address.shipping.hasOwnProperty("pincode")) {
                     if (!validPincode.test(pincode)) return res.status(400).send({ status: false, message: " Shipping pincode is invalid" })
                     finduser.address.shipping.pincode = pincode;
                 }
@@ -242,8 +236,8 @@ exports.updateUserDetails = async (req, res) => {
                 if (address.billing.hasOwnProperty("city")) {
                     if (!validName.test(city)) return res.status(400).send({ status: false, message: "billing city is invalid" })
                     finduser.address.billing.city = city;
-                 }
-                 if (address.billing.hasOwnProperty("pincode")) {
+                }
+                if (address.billing.hasOwnProperty("pincode")) {
                     if (!validPincode.test(pincode)) return res.status(400).send({ status: false, message: " billing pincode is invalid" })
                     finduser.address.billing.pincode = pincode;
                 }
