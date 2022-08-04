@@ -8,26 +8,35 @@ exports.createOrder = async (req, res) => {
     try {
         let userId = req.params.userId
         let data = req.body
+
+        if(!data.cartId) return res.status(400).send({ status: false, message: "please mention cartId in body" })
+        if(!mongoose.Types.ObjectId.isValid(data.cartId)) return res.status(400).send({ status: false, message: "cartId is invalid" })
         let checkCart = await cartModel.findOne({ userId: userId })
         if (!checkCart) return res.status(404).send({ status: false, message: "No cart found" })
+       
+        if(checkCart._id!= data.cartId) return res.status(400).send({ status: false, message: "cartId is not related to user" })
         if (!checkCart.items.length) return res.status(400).send({ status: false, message: "Cart is empty" })
         data.userId = userId
         data.items = checkCart.items
         data.totalPrice = checkCart.totalPrice
         data.totalItems = checkCart.totalItems
-        data.totalQuantity = (checkCart.items.reduce((a, b) => b.quantity + a.quantity))
+        //data.totalQuantity = checkCart.items.reduce((a, b) => {return a + b.quantity},0)
+        data.totalQuantity = checkCart.items.reduce(function (previousValue, currentValue) {
+            return previousValue + currentValue.quantity;
+        },0)
+        
 
         if (data.hasOwnProperty("cancellable")) {
-            if (!((data.cancellable == "true") || (data.cancellable == "false")))
+            if (!((data.cancellable == true) || (data.cancellable == false)))
                 return res.status(400).send({ status: false, messsage: "cancellable should be in boolean value" })
         }
 
-        // if (data.hasOwnProperty("status")) {
-        //     if (!['pending', 'completed', 'cancled'].includes(data.status))
-        //     return res.status(400).send({ status: false, messsage: "Status should be related" })
-        // }    
+        if (data.hasOwnProperty("status")) {
+            if (data.status!== "pending")
+            return res.status(400).send({ status: false, messsage: "Status should be pending only at the time of create order" })
+        }    
 
-        const OrderCreate = await orderModel.create(data)
+      let OrderCreate = await orderModel.create(data)
         await cartModel.findOneAndUpdate({ _id: checkCart._id }, { $set: { items: [], totalPrice: 0, totalItems: 0 } }, { new: true })
         return res.status(200).send({ status: true, message: "Order Created Successfully", data: OrderCreate })
 
