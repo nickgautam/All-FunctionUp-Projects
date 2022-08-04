@@ -106,13 +106,14 @@ exports.userRegister = async (req, res) => {
 exports.userLogin = async function (req, res) {
     try {
         let credentials = req.body
+        console.log(credentials)
         if (Object.keys(credentials).length == 0) return res.status(400).send({ status: false, message: "Please enter email & password" })
         let { email, password } = credentials
         if (!email) return res.status(400).send({ status: false, message: "email is required" })
         if (!password) return res.status(400).send({ status: false, message: "password is required" })
-        if (!validEmail.test(email)) { return res.status(400).send({ status: false, message: `Email is not valid ${email}` }) }
+        if (!validEmail.test(email)) return res.status(400).send({ status: false, message: `Email is not valid ${email}` }) 
         if (!password) return res.status(400).send({ status: false, message: "password is required" })
-        if (!validPassword.test(password)) { return res.status(400).send({ status: false, message: `password is not valid ${password}` }) }
+        if (!validPassword.test(password)) return res.status(400).send({ status: false, message: `password is not valid ${password}` }) 
 
         let user = await userModel.findOne({ email: email })
         if (!user) return res.status(404).send({ status: false, message: "User not found" })
@@ -124,7 +125,7 @@ exports.userLogin = async function (req, res) {
                 const token = jwt.sign({
                     userId: user._id,
                     iat: Math.floor(Date.now() / 1000),
-                    exp: Math.floor(Date.now() / 1000) + 23 * 60 * 60
+                    exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60 //expiry time is 24 hours
                 }, "my@fifth@project@product@management")
 
                 let final = { userId: user._id, token: token }
@@ -140,12 +141,9 @@ exports.userLogin = async function (req, res) {
     }
 }
 exports.getUserDetails = async (req, res) => {
-    let userId = req.params.userId
+    
     try {
-        checkUser = req.checkUser
-        // const checkUser = await userModel.findById(userId)
-        // if (!checkUser) return res.status(404).send({ status: false, message: "User not found" })
-
+        checkUser = req.checkUser// this code is related to middleware authorization
         return res.status(200).send({ status: true, message: "User profile details", data: checkUser })
     } catch (error) {
 
@@ -166,9 +164,8 @@ exports.updateUserDetails = async (req, res) => {
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
 
-        // const finduser = await userModel.findById(userId)
-        // if (!finduser) return res.status(404).send({ status: false, message: "User not found" })
-        finduser = req.checkUser
+     
+        finduser = req.checkUser // this code is related to middleware authorization
 
         if (data.hasOwnProperty("fname")) {
             if (!validName.test(fname)) return res.status(400).send({ status: false, message: "fname is Invalid" })
@@ -200,9 +197,6 @@ exports.updateUserDetails = async (req, res) => {
             if (files && files.length > 0) var uploadedFileURL = await awsController.uploadFile(files[0])
             finduser.profileImage = uploadedFileURL
         }
-
-
-
 
         if (data.hasOwnProperty("address")) {
             address = parseJSONSafely(address)

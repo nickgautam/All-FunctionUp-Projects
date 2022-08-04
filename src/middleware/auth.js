@@ -9,7 +9,7 @@ exports.authentication = async (req, res, next) => {
         if (!token) return res.status(400).send({ status: false, message: "Token is missing" });
         token = token.split(" ")
       
-        jwt.verify(token[1], "my@fifth@project@product@management", { ignoreExpiration:true },
+        jwt.verify(token[1], "my@fifth@project@product@management", { ignoreExpiration:true }, //avoid the invalid error
          function (err, decodedToken) {
             if (err) return res.status(401).send({ status: false, message: "Token is invalid" });
             if (Date.now() > decodedToken.exp * 1000) 

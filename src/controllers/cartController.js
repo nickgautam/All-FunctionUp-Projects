@@ -57,7 +57,7 @@ exports.createCart = async (req, res) => {
 
 
             checkCart.totalItems = checkCart.items.length
-            let createCart = await cartModel.findByIdAndUpdate(checkCart._id, checkCart, { new: true }).select({ "items._id": 0 }).populate("items.productId", { title: 1, _id: 0, price: 1 })
+            let createCart = await cartModel.findByIdAndUpdate(checkCart._id, checkCart, { new: true }).select({ "items._id": 0 })//.populate("items.productId", { title: 1, _id: 0, price: 1 })
             return res.status(200).send({ status: true, message: "Product SuccessFully Added", data: createCart })
         }
     }
@@ -128,10 +128,6 @@ exports.getCartDeatils = async (req, res) => {
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
     }
-
-
-
-
 }
 
 exports.DeleteCart = async (req, res) => {
@@ -142,8 +138,8 @@ exports.DeleteCart = async (req, res) => {
 
     if (checkCart.items.length === 0) return res.status(400).send({ status: false, message: "cart is already deleted" })
 
-    let deletedCart = await cartModel.findOneAndUpdate({ _id: checkCart._id }, { $set: { items: [], totalPrice: 0, totalItems: 0 } }, { new: true })
-    return res.status(204).send({ status: true, message: "cart Deleted Succesfully" })  //204 = No content found//
+    await cartModel.findOneAndUpdate({ _id: checkCart._id }, { $set: { items: [], totalPrice: 0, totalItems: 0 } }, { new: true })
+    return res.status(204).send({ status: true, message: "cart Deleted Succesfully" })  //204 = No content found. It removes the message//
 
 
 }

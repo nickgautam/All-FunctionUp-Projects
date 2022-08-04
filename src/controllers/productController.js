@@ -5,21 +5,19 @@ const mongoose = require('mongoose')
 const validObjectId = mongoose.Types.ObjectId
 
 const validTitle = /^[a-zA-Z0-9 ]{3,20}$/
-const validPrice = /^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$/  ///------- we need to update the regex decimal 2 digits
+const validPrice = /^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$/  
 
-function round(value, decimals) {
-    return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+function round(value) {
+   return Math.round(value*100)/100     //56.58021*100=> 5658.021=> 5658/100=> 56.58
 }
 
 
 exports.createProducts = async (req, res) => {
     try {
         let data = req.body
-        // console.log(typeof data)
         let files = req.files
         data = JSON.parse(JSON.stringify(data)); // used  for remove [Object: null prototype]
-        //console.log(typeof data)
-
+       
         let { title, description, price, currencyId, currencyFormat, productImage, style, availableSizes, installments, isFreeShipping, ...rest } = data
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "Please enter some data in request body" })
         if (Object.keys(rest).length > 0) return res.status(400).send({ status: false, message: "Invalid attribute in request body" })
@@ -30,15 +28,13 @@ exports.createProducts = async (req, res) => {
         if (!currencyId) return res.status(400).send({ status: false, message: "currencyId is required" })
         if (!currencyFormat) return res.status(400).send({ status: false, message: "currencyFormat is required" })
 
-
-
         if (!validTitle.test(title)) return res.status(400).send({ status: false, message: " title is invalid " })
         if (!isValid(description.trim())) return res.status(400).send({ status: false, message: " description  is invalid " })
         if (!isNaN(description.trim())) return res.status(400).send({ status: false, message: "description can't be a number" })
         if (!validPrice.test(price.trim())) return res.status(400).send({ status: false, message: "price is invalid " })
         price = Number(price)
-        data.price = round(price, 2)
-
+        data.price = round(price)
+    //  console.log(data.price)
         if (currencyId.trim() !== "INR") return res.status(400).send({ status: false, message: "currencyId is invalid " })
         if (currencyFormat.trim() !== "₹") return res.status(400).send({ status: false, message: "currencyFormat is invalid " })
         if (!validString(style)) return res.status(400).send({ status: false, message: "Style is invalid" })
@@ -64,7 +60,7 @@ exports.createProducts = async (req, res) => {
         }
 
         if (!files.length) return res.status(400).send({ status: false, message: "Please Provide the Image of the Product" })
-        mimetype = files[0].mimetype.split("/") //---["image",""]
+        mimetype = files[0].mimetype.split("/") //---["image","jpeg || png"]
         if (mimetype[0] !== "image") return res.status(400).send({ status: false, message: "Please Upload the Image File only" })
         if (files && files.length > 0) var uploadedFileURL = await uploadFile(files[0])
         data.productImage = uploadedFileURL
@@ -96,7 +92,7 @@ exports.getAllProduct = async (req, res) => {
         }
         if (data.hasOwnProperty("name")) {
             if (!validString(name)) { return res.status(400).send({ status: false, message: 'Please provide name ' }) }
-            filterData.title = { $regex: `${name.toLowerCase()}` }
+            filterData.title = { $regex: `${name.toLowerCase()}` }// used to find by substring
         }
         if (data.hasOwnProperty("priceGreaterThan")) {
             if (isNaN(priceGreaterThan)) return res.status(400).send({ status: false, message: "priceGreaterThan must be a number " })
@@ -121,9 +117,6 @@ exports.getAllProduct = async (req, res) => {
     } catch (error) {
         return res.status(500).send({ status: true, message: error.message })
     }
-
-
-
 }
 
 exports.getProductsById = async (req, res) => {

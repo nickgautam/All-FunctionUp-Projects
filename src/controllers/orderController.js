@@ -1,7 +1,5 @@
 const orderModel = require('../models/orderModel')
-const productModel = require('../models/productModel')
 const cartModel = require('../models/cartModel')
-const userModel = require('../models/userModel')
 const mongoose = require('mongoose')
 
 exports.createOrder = async (req, res) => {
@@ -20,12 +18,11 @@ exports.createOrder = async (req, res) => {
         data.items = checkCart.items
         data.totalPrice = checkCart.totalPrice
         data.totalItems = checkCart.totalItems
-        //data.totalQuantity = checkCart.items.reduce((a, b) => {return a + b.quantity},0)
+        
         data.totalQuantity = checkCart.items.reduce(function (previousValue, currentValue) {
             return previousValue + currentValue.quantity;
         },0)
         
-
         if (data.hasOwnProperty("cancellable")) {
             if (!((data.cancellable == true) || (data.cancellable == false)))
                 return res.status(400).send({ status: false, messsage: "cancellable should be in boolean value" })
