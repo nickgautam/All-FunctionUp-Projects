@@ -11,7 +11,7 @@ exports.createOrder = async (req, res) => {
         if(!mongoose.Types.ObjectId.isValid(data.cartId)) return res.status(400).send({ status: false, message: "cartId is invalid" })
         let checkCart = await cartModel.findOne({ userId: userId })
         if (!checkCart) return res.status(404).send({ status: false, message: "No cart found" })
-       
+      
         if(checkCart._id!= data.cartId) return res.status(400).send({ status: false, message: "cartId is not related to user" })
         if (!checkCart.items.length) return res.status(400).send({ status: false, message: "Cart is empty" })
         data.userId = userId
@@ -35,7 +35,7 @@ exports.createOrder = async (req, res) => {
 
       let OrderCreate = await orderModel.create(data)
         await cartModel.findOneAndUpdate({ _id: checkCart._id }, { $set: { items: [], totalPrice: 0, totalItems: 0 } }, { new: true })
-        return res.status(200).send({ status: true, message: "Order Created Successfully", data: OrderCreate })
+        return res.status(201).send({ status: true, message: "Order Created Successfully", data: OrderCreate })
 
 
     } catch (error) {
@@ -73,7 +73,7 @@ exports.updateOrder = async function (req, res) {
         if(status=="pending") return res.status(400).send({ status: false, message: "This Order is Already Pending" }) 
 
         let orderUpdate = await orderModel.findOneAndUpdate({ _id: orderId }, checkOrder, { new: true })
-        return res.status(201).send({ status: true, message: "Order Updated Successfully", data: orderUpdate })
+        return res.status(200).send({ status: true, message: "Order Updated Successfully", data: orderUpdate })
 
 
     } catch (error) {

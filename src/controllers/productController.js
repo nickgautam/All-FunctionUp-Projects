@@ -4,7 +4,7 @@ const { uploadFile } = require("./awsController")
 const mongoose = require('mongoose')
 const validObjectId = mongoose.Types.ObjectId
 
-const validTitle = /^[a-zA-Z0-9 ]{3,20}$/
+const validTitle = /^[a-zA-Z0-9 ]{3,50}$/
 const validPrice = /^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$/
 
 function round(value) {
