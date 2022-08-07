@@ -128,8 +128,8 @@ exports.getCartDeatils = async (req, res) => {
 }
 
 exports.DeleteCart = async (req, res) => {
-
-    let userId = req.params.userId
+   try{
+     let userId = req.params.userId
     let checkCart = await cartModel.findOne({ userId: userId })
     if (!checkCart) return res.status(404).send({ status: false, message: "cart not found" })
 
@@ -137,6 +137,8 @@ exports.DeleteCart = async (req, res) => {
 
     await cartModel.findOneAndUpdate({ _id: checkCart._id }, { $set: { items: [], totalPrice: 0, totalItems: 0 } }, { new: true })
     return res.status(204).send({ status: true, message: "cart Deleted Succesfully" })  //204 = No content found. It removes the message//
-
+} catch (error) {
+    return res.status(500).send({ status: false, message: error.message })
+}
 
 }

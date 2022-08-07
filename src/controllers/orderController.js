@@ -46,7 +46,6 @@ exports.createOrder = async (req, res) => {
 
 exports.updateOrder = async function (req, res) {
     try {
-        let userId = req.params.userId
         let data = req.body
         let { orderId, status, ...rest } = data
 
