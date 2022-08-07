@@ -74,7 +74,7 @@ exports.updateOrder = async function (req, res) {
         if(status=="pending") return res.status(400).send({ status: false, message: "This Order is Already Pending" }) 
 
         let orderUpdate = await orderModel.findOneAndUpdate({ _id: orderId }, checkOrder, { new: true })
-        return res.status(200).send({ status: true, message: "Order Updated Successfully", data: orderUpdate })
+        return res.status(201).send({ status: true, message: "Order Updated Successfully", data: orderUpdate })
 
 
     } catch (error) {

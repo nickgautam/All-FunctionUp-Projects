@@ -19,13 +19,13 @@ router.get('/products/:productId',getProductsById)
 router.put('/products/:productId',UpdateProducts)
 router.delete('/products/:productId',DeleteProducts)
 
-//===============Cart =======================//
-router.post('/users/:userId',authentication,authorization,createCart)
+//===============Cart Routes=====================================================================================================//
+router.post('/users/:userId/cart',authentication,authorization,createCart)
 router.put('/users/:userId/cart',authentication,authorization,updateCart)
 router.get('/users/:userId/cart',authentication,authorization,getCartDeatils)
 router.delete('/users/:userId/cart',authentication,authorization,DeleteCart)
 
-//============Order Routes ==========================//
+//============Order Routes ================================================================================================================//
 router.post('/users/:userId/orders',authentication,authorization,createOrder)
 router.put('/users/:userId/orders',authentication,authorization,updateOrder)
 

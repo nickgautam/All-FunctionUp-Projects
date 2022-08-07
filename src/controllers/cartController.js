@@ -5,13 +5,11 @@ const productModel = require('../models/productModel')
 
 
 exports.createCart = async (req, res) => {
-
     try {
         let userId = req.params.userId
         let data = req.body
         let totalPrice = 0;
         let checkCart = await cartModel.findOne({ userId: userId })
-        
         
         if (!checkCart) {
             data.userId = userId
@@ -44,7 +42,6 @@ exports.createCart = async (req, res) => {
             if (!findProduct) return res.status(404).send({ status: false, message: "Product not found" })
 
             let findObjIdIndex = checkCart.items.findIndex(obj => obj.productId.toString() === productId)
-
 
             if (checkCart.items[findObjIdIndex]) {
                 checkCart.items[findObjIdIndex].quantity += quantity
