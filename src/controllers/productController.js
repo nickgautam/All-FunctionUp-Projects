@@ -33,7 +33,7 @@ exports.createProducts = async (req, res) => {
         if (!validPrice.test(price.trim())) return res.status(400).send({ status: false, message: "price is invalid " })
         price = Number(price)
         data.price = round(price)
-        //  console.log(data.price)
+        //  console.log(data.price) 
         if (currencyId.trim() !== "INR") return res.status(400).send({ status: false, message: "currencyId is invalid " })
         if (currencyFormat.trim() !== "₹") return res.status(400).send({ status: false, message: "currencyFormat is invalid " })
         if (!validString(style)) return res.status(400).send({ status: false, message: "Style is invalid" })
@@ -109,7 +109,7 @@ exports.getAllProduct = async (req, res) => {
         }
         if (data.hasOwnProperty("priceSort")) {
             priceSort = data.priceSort
-            if (!(priceSort == 1 || priceSort == -1)) return res.status(400).send({ status: false, message: "priceSort must be either 1 & -1" })
+            if (!(priceSort == 1 || priceSort == -1)) return res.status(400).send({ status: false, message: "priceSort must be either 1 or -1" })
         }
         let productDetail = await productModel.find(filterData).sort({ price: priceSort })
         if (!productDetail.length) return res.status(404).send({ status: false, message: "Product not found" });
