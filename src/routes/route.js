@@ -6,26 +6,26 @@ const { createProducts, getAllProduct, getProductsById, UpdateProducts, DeletePr
 const { createCart, updateCart, getCartDeatils, DeleteCart } = require('../controllers/cartController')
 const { createOrder, updateOrder } = require('../controllers/orderController')
 
-//============= User Routes============================================================================================//
+//============= User Routes=====================================================================================================================//
 router.post('/register', userRegister)
 router.post('/login', userLogin)
 router.get('/user/:userId/profile', authentication, authorization, getUserDetails)
 router.put('/user/:userId/profile', authentication, authorization, updateUserDetails)
 
-//============= Products Routes============================================================================================//
+//============= Products Routes=================================================================================================================//
 router.post('/products', createProducts)
 router.get('/products', getAllProduct)
 router.get('/products/:productId', getProductsById)
 router.put('/products/:productId', UpdateProducts)
 router.delete('/products/:productId', DeleteProducts)
 
-//===============Cart Routes=====================================================================================================//
+//===============Cart Routes====================================================================================================================//
 router.post('/users/:userId/cart', authentication, authorization, createCart)
 router.put('/users/:userId/cart', authentication, authorization, updateCart)
 router.get('/users/:userId/cart', authentication, authorization, getCartDeatils)
 router.delete('/users/:userId/cart', authentication, authorization, DeleteCart)
 
-//============Order Routes ================================================================================================================//
+//============Order Routes =====================================================================================================================//
 router.post('/users/:userId/orders', authentication, authorization, createOrder)
 router.put('/users/:userId/orders', authentication, authorization, updateOrder)
 

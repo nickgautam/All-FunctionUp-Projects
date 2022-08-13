@@ -125,7 +125,7 @@ exports.userLogin = async function (req, res) {
                 const token = jwt.sign({
                     userId: user._id,
                     iat: Math.floor(Date.now() / 1000),
-                    exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60 //expiry time is 24 hours
+                    exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60 //expiry time is 24 hours ///2.56=>2
                 }, "my@fifth@project@product@management")
 
                 let final = { userId: user._id, token: token }
